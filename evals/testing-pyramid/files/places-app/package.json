@@ -8,11 +8,11 @@
   },
   "dependencies": {
     "@nestjs/common": "11.1.6",
-    "@nestjs/core": "11.1.6",
+    "@nestjs/core": "11.1.18",
     "@nestjs/platform-express": "11.1.6",
     "@sentry/browser": "10.72.0",
     "@sentry/nestjs": "10.72.0",
-    "preact": "10.27.2",
+    "preact": "10.27.3",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -21,6 +21,6 @@
     "jest": "30.4.2",
     "supertest": "7.1.4",
     "typescript": "5.9.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   }
 }
