@@ -36,8 +36,9 @@ Assertions are the most numerous check.
 Component tests and unit tests are equal and come next.
 E2E tests are few.
 
-Every project gets contracts, the `assert` function, the bootstrap test, and the accessibility file.
-Add Storybook when the project has UI.
+Every project gets contracts and the `assert` function.
+A project with E2E tests gets the bootstrap test.
+A project with UI gets the accessibility file and Storybook.
 Add golden tests, architecture tests, and Lighthouse only on the conditions in the references.
 
 ## Where does a requirement go
