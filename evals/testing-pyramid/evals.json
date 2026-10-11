@@ -1,0 +1,80 @@
+{
+  "skill_name": "testing-pyramid",
+  "evals": [
+    {
+      "id": 1,
+      "name": "contract-boundary",
+      "prompt": "Add GET /places/nearby?lat=..&lon=..&radius=.. to the backend. It should pull public toilets from the Overpass API (OpenStreetMap) around that point and return them as places. Then show the result in the Preact PlaceList on the frontend. Tests included please.",
+      "expected_output": "Strict zod schemas parse the Overpass response, the request query, and the API response on the frontend. No `as` casts in new code. Coordinate and radius ranges are asserted. Contract failures are reported to Sentry. Integration tests are named by endpoint and status. A request that breaks the request contract gets a 400 and is not sent to error reporting.",
+      "files": [
+        "evals/testing-pyramid/files/places-app"
+      ],
+      "expectations": [
+        "The Overpass response is parsed with a zod schema before the code uses it",
+        "The Overpass schema is strict: strictObject or .strict(), and latitude and longitude have numeric limits",
+        "The request query (lat, lon, radius) is parsed with a zod schema that has numeric ranges",
+        "The frontend parses the API response with a zod schema and does not cast response.json()",
+        "New and changed code has no `as` type cast (`as const` is allowed)",
+        "A contract failure on the frontend is reported to Sentry",
+        "One shared assert function exists and the new code uses it for an invariant or a data range",
+        "Integration tests have the endpoint and the status in the name, for example 'GET /places/nearby (200)'",
+        "Tests do not use jest.mock, vi.mock, jest.fn, vi.fn, or spies, also on the frontend",
+        "The tests include a property-based test with fast-check",
+        "Tests replace the Overpass HTTP call with MSW or an injected fake",
+        "A request that breaks the request contract gets a 400 and is not sent to Sentry"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "regression-fix",
+      "prompt": "PROJ-249 is back: the place marker still shows on the region selection view after you open a place and go back. Fix it and make sure it can't come back.",
+      "expected_output": "The defect is fixed. The test is in a separate *.regression.spec.ts file with a `// regression: PROJ-249: <title>` comment. The agent has no issue tracker access, so it asks the user for the exact title and does not invent one.",
+      "files": [
+        "evals/testing-pyramid/files/places-app"
+      ],
+      "expectations": [
+        "The defect is fixed: the marker is hidden on region selection also when a place is selected",
+        "The regression test is in a file with the name *.regression.spec.ts or *.regression.spec.tsx",
+        "A comment `// regression: PROJ-249: ...` is directly above the regression describe, test, or it",
+        "A regression test exists in a layer below E2E, for example a unit test for isPlaceMarkerVisible",
+        "New and changed code has no `as` type cast (`as const` is allowed)",
+        "No regression comment has an invented issue title",
+        "The response asks the user for the exact PROJ-249 title, or says the title is not verified"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "truncate-label-pl",
+      "prompt": "Napisz funkcję truncateLabel(text, maxLength) do PlaceCard - nazwy miejsc potrafią być bardzo długie i rozwalają kartę. Dodaj testy.",
+      "expected_output": "truncateLabel asserts its supported range with the single assert function. Tests are property-based with fast-check over that range, with table-driven cases via it.each where cases are similar. No mocks. The agent considers an existing package or CSS before it writes its own utility.",
+      "files": [
+        "evals/testing-pyramid/files/places-app"
+      ],
+      "expectations": [
+        "truncateLabel states its supported range with one shared assert function from the shared utilities",
+        "The tests include property-based tests with fast-check",
+        "The tests check input outside the supported range and expect a throw",
+        "Similar example cases use it.each or test.each with an inline array",
+        "PlaceCard uses truncateLabel and gets the maximum length as a prop with the constant as its default"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "slow-flaky-e2e",
+      "prompt": "our e2e suite takes ~20 min on CI and fails randomly maybe 1 in 5 runs. look at e2e/ and .github/workflows/ci.yml and tell me what to change, then do the first two changes.",
+      "expected_output": "The agent moves checks out of E2E into cheaper layers (assertion, unit or component test), keeps E2E for user stories, adds a bootstrap test that runs before the suite, removes fixed sleeps, handles the cookie banner in shared setup, and does not propose golden screenshot tests.",
+      "files": [
+        "evals/testing-pyramid/files/places-app"
+      ],
+      "expectations": [
+        "The legal page cookie text check moves, or is proposed to move, out of E2E into a cheaper layer",
+        "The Free and Paid label checks move, or are proposed to move, out of E2E into unit or component tests",
+        "A bootstrap test that runs before the E2E suite and gates it is added or proposed",
+        "All fixed sleeps (waitForTimeout) are removed or proposed for removal",
+        "The cookie banner is handled in shared setup, or is named as a cause of flaky runs",
+        "The response does not propose pixel screenshot comparison (golden) tests",
+        "The E2E test for the key user story (find a place in a region and open its details) stays in E2E"
+      ]
+    }
+  ]
+}
