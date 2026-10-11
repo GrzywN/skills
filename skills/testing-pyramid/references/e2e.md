@@ -6,7 +6,7 @@ Keep them few and move checks down when you can.
 
 ## Bootstrap test
 
-Each project has one test that runs before the E2E suite.
+Each project with E2E tests has one test that runs before the suite.
 
 ```typescript
 test('bootstrap', () => {
