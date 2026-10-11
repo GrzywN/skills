@@ -17,8 +17,10 @@ npx skills add GrzywN/skills@testing-pyramid
 
 ## Layout
 
-- `skills/<name>/` is a skill. This is what you install.
-- `evals/<name>/` has the test prompts and the example project for a skill. It is not installed.
+- `skills/<name>/` is a skill.
+  This is what you install.
+- `evals/<name>/` has the test prompts and the example project for a skill.
+  It is not installed.
 - `repos/agentskills/` is a copy of the Agent Skills specification, for reference.
 
 ## Validate

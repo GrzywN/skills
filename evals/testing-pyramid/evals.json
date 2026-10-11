@@ -27,19 +27,19 @@
     {
       "id": 2,
       "name": "regression-fix",
-      "prompt": "PROJ-249 is back: the place marker still shows on the region selection view after you open a place and go back. Fix it and make sure it can't come back.",
-      "expected_output": "The defect is fixed. The test is in a separate *.regression.spec.ts file with a `// regression: PROJ-249: <title>` comment. The agent has no issue tracker access, so it asks the user for the exact title and does not invent one.",
+      "prompt": "PROJ-417 is back: after you open a place and return to the region picker, its pin is still on the map. Fix it and make sure it can't come back.",
+      "expected_output": "The defect is fixed. The test is in a separate *.regression.spec.ts file with a `// regression: PROJ-417: <title>` comment. The agent has no issue tracker access, so it asks the user for the exact title and does not invent one.",
       "files": [
         "evals/testing-pyramid/files/places-app"
       ],
       "expectations": [
         "The defect is fixed: the marker is hidden on region selection also when a place is selected",
         "The regression test is in a file with the name *.regression.spec.ts or *.regression.spec.tsx",
-        "A comment `// regression: PROJ-249: ...` is directly above the regression describe, test, or it",
+        "A comment `// regression: PROJ-417: ...` is directly above the regression describe, test, or it",
         "A regression test exists in a layer below E2E, for example a unit test for isPlaceMarkerVisible",
         "New and changed code has no `as` type cast (`as const` is allowed)",
         "No regression comment has an invented issue title",
-        "The response asks the user for the exact PROJ-249 title, or says the title is not verified"
+        "The response asks the user for the exact PROJ-417 title, or says the title is not verified"
       ]
     },
     {
