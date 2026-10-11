@@ -19,9 +19,11 @@ The test passes only when the app starts and the E2E setup works.
 A wrong setup then fails in seconds, not after a 20-minute suite in which every test fails.
 
 Make the suite depend on it, so a failure stops the run.
+The Playwright config must start the app with `webServer`, so the bootstrap test proves that the app starts.
 
 ```typescript
 export default defineConfig({
+  webServer: { command: 'npm run dev', url: 'http://localhost:4321' },
   projects: [
     { name: 'bootstrap', testMatch: 'bootstrap.spec.ts' },
     { name: 'e2e', testIgnore: 'bootstrap.spec.ts', dependencies: ['bootstrap'] },
