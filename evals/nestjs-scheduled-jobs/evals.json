@@ -1,0 +1,58 @@
+{
+  "skill_name": "nestjs-scheduled-jobs",
+  "evals": [
+    {
+      "id": 1,
+      "name": "three-replicas-cron",
+      "prompt": "We go to prod with 3 replicas next week, anything in the cron code I should worry about? Fix what you find.",
+      "expected_output": "The agent sees that the nightly @Cron export runs on all three replicas, adds @nestjs/locks with @OnOneInstance (explicit key) and @WithoutOverlapping on a shared Postgres or Redis lock store that registers itself with LocksStorage, creates the locks table through a migration, rewrites the job to export every paid order that is not exported yet instead of yesterday's window, and proves one run on several app instances.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response says the @Cron job in InvoicesService runs on every replica, so three times with 3 replicas",
+        "@nestjs/locks is added to the dependencies in package.json",
+        "LocksModule.forRoot() or LocksModule.forRootAsync() is imported in AppModule",
+        "The export method has @OnOneInstance() with an explicit key string",
+        "The export method also has @WithoutOverlapping()",
+        "A provider implements LockStore and calls registerSource(this) on LocksStorage in its constructor",
+        "The lock store is backed by Postgres or Redis, not InMemoryLockStore, and allowInMemoryStorage is not set to true",
+        "The job no longer selects orders by a createdAt window (Between(start, end)); it selects paid orders with invoiceExported = false",
+        "The locks table (and the fencing token sequence for Postgres) is created by a migration, or the response says a migration is required, not synchronize",
+        "A test or a described verification runs the job on more than one app instance and expects exactly one run"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "invoice-emails-twice",
+      "prompt": "After last night's deploy some customers got their invoice email twice, and last week when the mailer was down for ten minutes nobody got one and nothing ever retried. Look at src/invoices and the BullMQ setup and fix it.",
+      "expected_output": "The agent sets defaultJobOptions with attempts, backoff, removeOnComplete and removeOnFail, adds a jobId derived from the order id, makes the processor skip orders already exported, throw on a failed mailer response so BullMQ retries, add a timeout to the mailer call, and explains that a job can run twice (stalled job, crash, a cron on several replicas), so the processor must be idempotent.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "BullMQ defaultJobOptions (in BullModule.forRoot/forRootAsync or registerQueue) sets attempts greater than 1",
+        "defaultJobOptions sets a backoff",
+        "defaultJobOptions sets removeOnComplete and removeOnFail explicitly",
+        "queue.add or queue.addBulk passes a jobId derived from the order id, and the jobId contains no ':'",
+        "InvoicesProcessor.process returns early when order.invoiceExported is already true",
+        "InvoicesProcessor throws when the mailer response is not ok, so the job is retried",
+        "The fetch call to the mailer has a timeout or an AbortSignal",
+        "The response explains that the same job can run twice (stalled job, worker crash, or the cron running on several replicas)"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "long-reconciliation-job",
+      "prompt": "Add a job that every 5 minutes asks the carrier API (CARRIER_API_URL) for the status of every shipped order and updates the orders. With a lot of orders it can take longer than 5 minutes.",
+      "expected_output": "A new @Cron job every 5 minutes with @OnOneInstance (explicit key) and @WithoutOverlapping on a shared lock store, which passes LocksContext.signal to the carrier calls, processes the current set of shipped orders rather than a time window, and has a test or verification that a second tick during a running run is skipped.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The new job uses @Cron with a 5 minute schedule (for example CronExpression.EVERY_5_MINUTES or '*/5 * * * *')",
+        "The job has @WithoutOverlapping()",
+        "The job has @OnOneInstance() with an explicit key",
+        "The job reads LocksContext and passes its signal to the carrier HTTP calls",
+        "The carrier calls have a timeout",
+        "The job selects orders by their current status, not by a time window",
+        "A shared lock store (Postgres or Redis) is registered, or already exists, and the in-memory store is not used in production",
+        "The response or a test shows that a tick during a running run is skipped"
+      ]
+    }
+  ]
+}

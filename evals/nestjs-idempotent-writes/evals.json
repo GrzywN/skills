@@ -1,0 +1,55 @@
+{
+  "skill_name": "nestjs-idempotent-writes",
+  "evals": [
+    {
+      "id": 1,
+      "name": "pay-idempotency-key",
+      "prompt": "Add Idempotency-Key support to POST /orders/:id/pay using @nestjs/idempotency. We run 3 replicas on Kubernetes with Postgres and Redis.",
+      "expected_output": "IdempotencyModule is registered with a per-user scope, the pay handler has @Idempotent({ required: true }), a shared Postgres or Redis IdempotencyStore registers itself with IdempotencyStorage, the table ships as a migration, the Stripe call gets its own idempotency key derived from the user and the client key, the exception filter keeps the error code, and an e2e test proves the replay, the 409, the 422 and the 400.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "@nestjs/idempotency is added to the dependencies in package.json",
+        "IdempotencyModule.forRoot or forRootAsync is imported in AppModule with a scope that reads the user set by the guard (req.user.sub or equivalent)",
+        "The pay handler has @Idempotent({ required: true })",
+        "A provider implements IdempotencyStore and calls registerSource(this) on IdempotencyStorage in its constructor",
+        "The store is backed by Postgres or Redis, and allowInMemoryStorage is not set to true",
+        "With a Postgres store, the table is created by a migration and the response column is json, not jsonb",
+        "The Stripe request sends an Idempotency-Key header derived from the user and the client's key",
+        "AllExceptionsFilter is changed to keep the HttpException body (code field), or the response says it drops the code from 400/409/422 answers",
+        "An e2e test sends the same key twice and asserts Idempotent-Replayed: true and a single payment provider call",
+        "An e2e test or curl check covers the 422 for the same key with a different body"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "double-charge-pl",
+      "prompt": "Klienci z aplikacji mobilnej czasem płacą dwa razy za to samo zamówienie, kiedy zerwie im się internet w trakcie płatności. Ogarniesz to?",
+      "expected_output": "The agent traces the double charge to client retries of POST /orders/:id/pay, requires an Idempotency-Key with @nestjs/idempotency on a shared store with a per-user scope, keeps a state check in OrdersService so an already paid order is refused, passes an idempotency key to Stripe, and explains that the app must reuse the same key on every retry of one payment.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response names client retries of POST /orders/:id/pay as the cause of the double charge",
+        "The pay endpoint requires an Idempotency-Key (@Idempotent({ required: true }) or an equivalent check)",
+        "Idempotency records are kept in a store shared by all replicas (Postgres or Redis), not in memory",
+        "The idempotency scope is per user",
+        "OrdersService.pay refuses an order whose status is not pending, or updates it conditionally on status",
+        "The Stripe call sends its own Idempotency-Key header",
+        "The response says the mobile app must create the key once per payment attempt and send the same key on every retry"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "interceptor-order-review",
+      "prompt": "Next sprint we add @nestjs/idempotency to POST /orders/:id/pay, @nestjs/resilience with retries, and a global ClassSerializerInterceptor as APP_INTERCEPTOR in AppModule. Anything we should watch out for in how these fit together? Don't change code yet, just tell me.",
+      "expected_output": "The agent explains that global interceptor order follows registration order, so IdempotencyModule must be imported before ResilienceModule, that a ClassSerializerInterceptor registered as APP_INTERCEPTOR in AppModule runs outside the idempotency interceptor and makes the app refuse to start, that @Retry on a POST only runs with idempotent: true and re-runs inside one request while @Idempotent dedupes across requests, and that retries multiply across layers.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response says IdempotencyModule must come before ResilienceModule in imports, because import order sets the order of global interceptors",
+        "The response says a ClassSerializerInterceptor provided as APP_INTERCEPTOR in AppModule makes the idempotency module refuse to start, and suggests app.useGlobalInterceptors() or a module imported after IdempotencyModule",
+        "The response says @Retry() on a POST handler is inactive unless it is marked idempotent: true",
+        "The response distinguishes @Retry (re-runs within one request) from @Idempotent (deduplicates client retries across requests)",
+        "The response warns that retries in several layers multiply the number of attempts",
+        "No source files are changed"
+      ]
+    }
+  ]
+}
