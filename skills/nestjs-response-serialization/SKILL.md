@@ -93,6 +93,8 @@ Detect the package manager from the lockfile and use the Makefile targets when t
    export class AppModule {}
    ```
 
+   With `@nestjs/idempotency`, do not put it in the root module's `providers`: it then runs outside the idempotency interceptor, and startup fails.
+   Provide it as `APP_INTERCEPTOR` in a module imported after `IdempotencyModule` instead (see `nestjs-idempotent-writes`).
    Put `@SerializeOptions({ type: OrderResponse })` on the controller or the handler.
    With `type` set, the interceptor converts plain objects and entities to `OrderResponse` first, so only the `@Expose()` fields go out.
    Without `type`, only class instances are filtered, and only by their own decorators.
@@ -222,3 +224,4 @@ Detect the package manager from the lockfile and use the Makefile targets when t
 - `nestjs-error-handling`: error bodies must not leak internals either.
 - `nestjs-dependency-updates`: matching `@nestjs/swagger` and `@nestjs/common` majors, and Nest 12 for `StandardSchemaSerializerInterceptor`.
 - `nestjs-http-edge-security`: CORS and headers for the same responses.
+- `nestjs-idempotent-writes`: where to register `ClassSerializerInterceptor` when `IdempotencyModule` is used.

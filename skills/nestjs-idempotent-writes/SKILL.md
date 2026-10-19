@@ -123,7 +123,8 @@ Where the provider has no such key, use `storeIf: (status, error) => status < 50
 - Make the global exception filter keep the body of an `HttpException`, for example by extending `BaseExceptionFilter` (see `nestjs-error-handling`).
 - Add the CORS headers from Check step 7 (see `nestjs-http-edge-security`).
 - With the Postgres store, call `prune()` from an `@Interval()` job guarded by `@OnOneInstance()` (see `nestjs-scheduled-jobs`).
-- Register `ClassSerializerInterceptor` with `app.useGlobalInterceptors()` or in a module imported after `IdempotencyModule`.
+- Provide `ClassSerializerInterceptor` as `APP_INTERCEPTOR` in a module imported after `IdempotencyModule`, so e2e tests built from `AppModule` get it too.
+  `app.useGlobalInterceptors()` also avoids the startup error, but tests that do not run `main.ts` then lack the serializer.
 
 ### 7. Fallback for Nest 10 or older
 
