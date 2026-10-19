@@ -1,0 +1,65 @@
+{
+  "skill_name": "nestjs-observability",
+  "evals": [
+    {
+      "id": 1,
+      "name": "db-blip-restart-storm-pl",
+      "prompt": "Wczoraj baza padła na minutę i Kubernetes zrestartował wszystkie trzy pody orders-api, a potem w logach nie dało się znaleźć, które żądania się wysypały. Co poprawić przed kolejnym wdrożeniem? Popraw to.",
+      "expected_output": "The agent finds that both probes hit /health, which pings the database, splits it into a dependency-free liveness route and a readiness route with a database check and a timeout, updates k8s/deployment.yaml, and switches logging to JSON with a trace id per line, replacing console.log and the request-scoped RequestLogger. It asks before adding any monitoring service that needs an account.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "The response explains that the liveness probe checks the database, so a database outage restarts every pod",
+        "HealthController has a liveness route that touches no database, Redis or HTTP dependency",
+        "HealthController has a readiness route that runs the TypeORM pingCheck with a timeout",
+        "k8s/deployment.yaml points livenessProbe and readinessProbe at different paths",
+        "The readinessProbe timeoutSeconds is larger than the database check timeout, or the response mentions the 1 second default",
+        "main.ts creates the app with a JSON logger, for example ConsoleLogger with json: true",
+        "Each log line of a request carries a trace or request id, through nestjs-cls, OpenTelemetry or another AsyncLocalStorage store",
+        "RequestLogger with Scope.REQUEST and its console.log are removed or replaced by a Logger",
+        "No paid service, account or credential is added without asking the user",
+        "The response is written in Polish"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "observe-setup-request",
+      "prompt": "Set up monitoring for orders-api. I heard NestJS Observe is good, can you wire it up?",
+      "expected_output": "The agent presents NestJS Observe as a paid hosted service with a free tier next to a vendor-neutral path (OpenTelemetry, or what the project already uses), and asks before creating an account or adding credentials. If the user agrees, it adds @nestjs/observe with createObserveModule, ObserveModule.forRoot with a serviceId and probe paths in http.ignore, and the instrument option in NestFactory.create, reading the keys from OBSERVE_APP_KEY and OBSERVE_APP_SECRET.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "The response says that NestJS Observe is a paid service with a free tier",
+        "The response offers a vendor-neutral alternative such as OpenTelemetry",
+        "The agent asks the user before signing up, creating keys, or running npx @nestjs/observe link, and does not run that command itself",
+        "If code is added, it uses createObserveModule from @nestjs/observe and passes ObserveInstrument as the instrument option of NestFactory.create",
+        "No appKey or appSecret value is written into source files, .env.example values, the Dockerfile or the image",
+        "http.ignore lists the probe paths as strings or a function, not only a RegExp",
+        "The response notes that a string in http.ignore matches the URL exactly, or lists every probe path separately",
+        "The liveness and readiness routes are split before the probe paths are ignored, or the response says they must be"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "useless-logs",
+      "prompt": "Our logs from orders-api are useless in Loki: multi-line text, debug noise, and no way to tie lines to a request or a failed invoice job. Fix the logging.",
+      "expected_output": "The agent switches the app logger to ConsoleLogger JSON mode (or configures the existing logger library for JSON), sets production levels with NEST_LOG_LEVEL or logLevels, adds a trace id per line through AsyncLocalStorage, uses structured params instead of string interpolation, redacts secrets, removes console.log calls including the config dump, and logs failed BullMQ jobs with their id.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "main.ts passes a logger with json: true, or a subclass of ConsoleLogger with JSON output, to NestFactory.create",
+        "Production log levels are set with NEST_LOG_LEVEL in the deployment env or with logLevels, so debug and verbose are off",
+        "Log lines carry a request or trace id from AsyncLocalStorage, nestjs-cls or a tracer, not from a request-scoped provider",
+        "The console.log of the config object in app.module.ts is removed",
+        "No console.log call is left in src",
+        "New log calls pass data as a plain object (structured params) instead of building it into the message string",
+        "authorization or other secret keys are masked with the logger's redact option or not logged",
+        "InvoicesProcessor logs failed jobs with the job id, for example with @OnWorkerEvent('failed')",
+        "The verification parses each log line as JSON or greps for the trace id of a test request"
+      ]
+    }
+  ]
+}
