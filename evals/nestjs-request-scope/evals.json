@@ -1,0 +1,37 @@
+{
+  "skill_name": "nestjs-request-scope",
+  "evals": [
+    {
+      "id": 1,
+      "name": "p95-regression-pl",
+      "prompt": "Od kiedy dodaliśmy logowanie z x-request-id, p95 dla /orders wyraźnie wzrosło, a profil pokazuje dużo czasu w GC. Znajdź przyczynę i napraw, ale logi mają dalej mieć x-request-id.",
+      "expected_output": "The agent finds that RequestLogger is Scope.REQUEST and injects REQUEST, which makes OrdersService, OrdersController and AdminOrdersController request-scoped. It replaces the per-request instance with AsyncLocalStorage or nestjs-cls, makes RequestLogger a singleton that still prints x-request-id, and adds a test that lists request-scoped classes.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response names RequestLogger with Scope.REQUEST as the cause",
+        "The response explains that OrdersService and the orders controllers become request-scoped through it",
+        "RequestLogger no longer has scope: Scope.REQUEST and no longer injects REQUEST",
+        "The request id is read from AsyncLocalStorage or nestjs-cls (ClsService)",
+        "Log lines still contain the x-request-id header value",
+        "The store is opened with run() around next() (or nestjs-cls middleware with mount: true), not with enterWith",
+        "A test or a NEST_DEBUG run proves that no orders class is request-scoped any more",
+        "The response is written in Polish"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "cron-in-orders-service",
+      "prompt": "Move the nightly invoice export cron from InvoicesService into OrdersService so all order logic lives in one place, and log each exported order with our RequestLogger.",
+      "expected_output": "The agent notices that OrdersService is request-scoped through RequestLogger, so @nestjs/schedule would not register the @Cron there (only a warning is logged). It removes the request-scoped chain first (AsyncLocalStorage or nestjs-cls), opens a context for the job, and then moves the cron, or explains why it must not move as-is.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response says that a @Cron in a request-scoped provider is not registered by @nestjs/schedule",
+        "The response identifies that OrdersService is request-scoped because it injects RequestLogger",
+        "The final code has no @Cron method in a class whose dependency tree is request-scoped",
+        "RequestLogger is a singleton that reads its context from AsyncLocalStorage or nestjs-cls",
+        "The cron job runs inside its own context (als.run or @UseCls) or logs without one safely",
+        "The response verifies the cron is registered, for example by checking for the absence of the 'non static provider' warning"
+      ]
+    }
+  ]
+}

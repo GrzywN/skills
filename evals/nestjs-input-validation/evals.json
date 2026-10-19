@@ -1,0 +1,57 @@
+{
+  "skill_name": "nestjs-input-validation",
+  "evals": [
+    {
+      "id": 1,
+      "name": "paid-without-paying",
+      "prompt": "Support found an order that is status 'paid' with invoiceExported true, but Stripe has no payment for it. It was created through POST /orders by a customer. Also yesterday someone called GET /orders?take=500000 and the pod restarted. Fix both so it can't happen again.",
+      "expected_output": "The agent traces both incidents to missing input validation: no global pipe, so CreateOrderDto extra fields reach repository.save(dto) and take has no cap. It registers ValidationPipe with whitelist, forbidNonWhitelisted and transform as an APP_PIPE provider, bounds take with a maximum and a default, converts the query value to a number, and adds an e2e test built from the real AppModule.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "A global ValidationPipe is registered as an APP_PIPE provider in a module, not only with app.useGlobalPipes in main.ts",
+        "The ValidationPipe options include whitelist: true",
+        "The ValidationPipe options include forbidNonWhitelisted: true",
+        "The ValidationPipe options include transform: true",
+        "ListOrdersQuery.take has a maximum (@Max or .max) of at most a few hundred",
+        "ListOrdersQuery.take has a default value, so GET /orders without take does not load every row",
+        "ListOrdersQuery.take is converted from the query string to a number, for example with @Type(() => Number)",
+        "CreateOrderDto.customerEmail uses @IsEmail() instead of @IsString()",
+        "An e2e test builds the app from AppModule without calling useGlobalPipes and expects 400 for a body with an extra field such as status",
+        "An e2e test expects 400 for a take value above the maximum"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "harden-inputs-zod",
+      "prompt": "We want to move orders-api request validation to Zod since we already have zod in package.json. Convert the orders endpoints to Zod schemas and make sure unknown fields are rejected, then tell me what else in the request handling is risky.",
+      "expected_output": "The agent uses StandardSchemaValidationPipe (available from @nestjs/common 12.0.0, the project has 12.2) registered as APP_PIPE, attaches schemas with @Body({ schema }) and @Query({ schema }), uses z.strictObject for bodies, caps take with max and default, validates the id parameter, and flags the global 50mb JSON body limit in main.ts.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "StandardSchemaValidationPipe is registered as an APP_PIPE provider",
+        "POST /orders uses @Body({ schema: ... }) with a Zod schema",
+        "The create-order body schema uses z.strictObject (or .strict()) so unknown keys are rejected",
+        "The list query schema caps take with .max() and sets .default()",
+        "The list query schema coerces take with z.coerce.number()",
+        "The :id route parameter is validated as a UUID (ParseUUIDPipe or a schema)",
+        "app.useBodyParser('json', { limit: '50mb' }) is removed from main.ts or flagged as a risk",
+        "The response does not claim that z.object() rejects unknown keys"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "przeglad-wejscia-pl",
+      "prompt": "Za tydzień wchodzimy na produkcję z orders-api. Przejrzyj kontrolery orders i shipping pod kątem tego, co klient może nam wysłać, i popraw to, co trzeba.",
+      "expected_output": "The agent finds that no global validation pipe exists, that POST /orders can set status, invoiceExported and other columns through repository.save(dto), that take has no cap or default, that the admin export loads all orders, that shipping orderId is unvalidated and interpolated into the carrier URL, and that the JSON body limit is raised to 50mb globally. It fixes them and adds tests.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "A global validation pipe is added and registered as an APP_PIPE provider",
+        "The response names mass assignment through repository.save(dto) in OrdersService.create as a risk",
+        "take gets a maximum and a default",
+        "The admin export endpoint no longer calls list() without a page size, or is flagged as loading the whole table",
+        "GET /shipping/quotes validates orderId (for example as a UUID) before it is used in the carrier URL",
+        "The global 50mb JSON body limit is removed or flagged",
+        "The response is written in Polish"
+      ]
+    }
+  ]
+}
