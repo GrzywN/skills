@@ -129,6 +129,8 @@ export class HttpClientErrorFilter extends BaseExceptionFilter {
 ```
 
 Register it with `{ provide: APP_FILTER, useClass: HttpClientErrorFilter }`.
+Nest checks global filters in reverse order of registration, so a catch-all `@Catch()` filter registered after this one wins and the route answers 500.
+Register this filter after any catch-all filter, and confirm the 504 in Verify.
 Where a specific status means something (a 404 from the upstream), catch `HttpResponseError` in the service and throw your own exception.
 
 ### 4. Retry a POST only with an idempotency key

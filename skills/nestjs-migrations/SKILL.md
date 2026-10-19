@@ -129,7 +129,8 @@ That same rule makes rollback simple: redeploy the previous image.
       The code writes both columns and reads `email ?? customerEmail`.
       Backfill in batches in a separate migration or job.
    2. Switch: make the code read and write only `email`.
-      Add `NOT NULL` once the backfill is done.
+      The same release's migration drops `NOT NULL` from `customerEmail`, or inserts fail once the code stops writing it.
+      Add `NOT NULL` to `email` once the backfill is done.
    3. Contract: drop `customerEmail`, only after no running or rollback-target image reads it.
 
    The same applies to dropping a column or table, adding `NOT NULL` without a default, and changing a type.
