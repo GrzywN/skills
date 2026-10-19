@@ -218,6 +218,7 @@ Call it on boot, remove the `@Cron()`, and keep the processor idempotent as in s
 3. Prove the production guard: with `NODE_ENV=production` and no store provider, `app.init()` rejects with `no LockStore is registered`.
 4. Boot the app and read the log line `LocksStorage: TypeOrmLockStore` (or your store's class name).
 5. Locally, start three instances on different ports with `INVOICE_EXPORT_CRON='*/10 * * * * *'` and the `debug` log level.
+   Set it in the shell, not in `.env`, because the decorator reads `process.env` when the module is imported, before `ConfigModule` loads `.env`.
    One logs `runs on this instance`, the others log `Skipped ... it runs on another instance`.
    Kill the owner with `kill -9` and watch another instance take over after `ttl`.
 6. Add the same `jobId` twice and check that `queue.getJobCountByTypes('waiting')` is 1.

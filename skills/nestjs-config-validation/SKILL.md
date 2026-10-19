@@ -15,7 +15,7 @@ Secrets belong in the platform's secret store, injected at runtime, and never in
 
 - [ ] Search `src/` for `ConfigModule.forRoot(`.
       Pass: it has `validationSchema` or `validate`.
-- [ ] Read the installed `@nestjs/config` version from the lockfile or `node_modules/@nestjs/config/package.json`.
+- [ ] Read the installed `@nestjs/config` version from the lockfile or `node_modules/@nestjs/config/package.json`, or the range in `package.json` when neither exists.
       `validationSchema` takes a Standard Schema from 12.0.0.
       Version 4.x and older take only Joi there (see Gotchas).
 - [ ] List every variable the code reads: search for `config.get(`, `configService.get(`, `getOrThrow(`, `process.env.`, and read `.env.example`.
@@ -155,7 +155,7 @@ Secrets belong in the platform's secret store, injected at runtime, and never in
   A Zod schema there fails with `validationSchema.validate is not a function` before Zod 4.6.
   From Zod 4.6 it passes silently, because Zod's own `validate()` returns a boolean and the config module reads `error` from it.
   Use `validate` on 4.x.
-- From 12.0.0, the module validates `process.env` too (`validatePredefined` defaults to `true`) and merges the variables the schema does not declare back in.
+- The module validates `process.env` too (`validatePredefined` defaults to `true`), and from 12.0.0 it merges the variables the schema does not declare back in.
   A strict object schema rejects the whole environment.
 - `z.coerce.boolean()` turns `'false'` into `true`.
   Use `z.stringbool()`.

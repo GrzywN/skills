@@ -180,7 +180,7 @@ And if V8's heap limit is above the container's memory limit, the kernel kills t
   As PID 1, that second signal is ignored, and the process exits only if the event loop is empty.
   Any open timer or socket keeps it alive until `SIGKILL`.
   Kubernetes has no `--init` flag, so use `tini` in the image or `useProcessExit: true`.
-- `useProcessExit: true` changes the exit code from `143` to `0`, and signal handlers of other libraries may not run.
+- `useProcessExit: true` changes the exit code from `143` to `0`, and async work that other libraries start in their own signal handlers is cut off.
   It also lets async loggers (for example Pino with transports) flush.
 - The shutdown order is: the HTTP adapter is marked as closing, `onModuleDestroy`, `beforeApplicationShutdown`, the HTTP server, gateways and microservices close, then `onApplicationShutdown`.
   Requests still run during the first two hooks, so do not close a pool there.

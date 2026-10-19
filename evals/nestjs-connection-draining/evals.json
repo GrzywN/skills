@@ -9,7 +9,7 @@
       "files": ["evals/nestjs-production-checklist/files/orders-api"],
       "expectations": [
         "k8s/deployment.yaml has a preStop hook on the orders-api container with a sleep of about 5 seconds, as a sleep action or exec sleep",
-        "NestFactory.create in src/main.ts gets return503OnClosing: true",
+        "NestFactory.create in src/main.ts gets return503OnClosing: true, inline or through an imported options object such as appOptions",
         "src/main.ts calls app.enableShutdownHooks",
         "k8s/deployment.yaml sets terminationGracePeriodSeconds explicitly",
         "The response explains that endpoint removal and SIGTERM start at the same time and the endpoint change takes seconds to propagate",
@@ -39,7 +39,7 @@
       "expected_output": "The agent turns on return503OnClosing but explains in Polish that it alone does not stop failed requests during endpoint propagation, because the 503s still reach clients routed to the pod. It adds the preStop delay and enableShutdownHooks, and keeps terminationGracePeriodSeconds within budget.",
       "files": ["evals/nestjs-production-checklist/files/orders-api"],
       "expectations": [
-        "NestFactory.create in src/main.ts gets return503OnClosing: true",
+        "NestFactory.create in src/main.ts gets return503OnClosing: true, inline or through an imported options object such as appOptions",
         "The response says that return503OnClosing alone is not enough because clients still routed to the pod get 503s",
         "k8s/deployment.yaml gets a preStop delay",
         "src/main.ts calls app.enableShutdownHooks, because without it the 503 mode never turns on",
