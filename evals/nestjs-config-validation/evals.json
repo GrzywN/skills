@@ -1,0 +1,53 @@
+{
+  "skill_name": "nestjs-config-validation",
+  "evals": [
+    {
+      "id": 1,
+      "name": "empty-stripe-key",
+      "prompt": "Yesterday a new orders-api pod went green on its health check, took traffic, and then every payment failed with a 401 from Stripe. The key turned out to be empty in that environment. How do we make sure this can't happen again?",
+      "expected_output": "The agent finds that ConfigModule.forRoot has no validation, adds a Zod schema (zod is already a dependency and @nestjs/config is 12.x) as validationSchema with every variable the code reads, gives the secrets a minimum length so an empty key fails, switches required reads to getOrThrow or a typed ConfigService, and proves that the built app exits on boot when STRIPE_SECRET_KEY is missing or empty.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "ConfigModule.forRoot in src/app.module.ts gets a validationSchema built with zod, not a validate function and not Joi",
+        "The schema declares DATABASE_URL, REDIS_URL, STRIPE_SECRET_KEY, CARRIER_API_URL, JWT_SECRET, NODE_ENV and PORT",
+        "STRIPE_SECRET_KEY in the schema rejects an empty string, for example with .min(1)",
+        "The schema is a non-strict object (z.object, not z.strictObject or .strict())",
+        "PORT is coerced to a number, for example with z.coerce.number()",
+        "OrdersService reads STRIPE_SECRET_KEY with getOrThrow or a typed ConfigService get with infer: true, not a plain config.get",
+        "The response or a test shows the app failing at boot with 'Config validation error' when STRIPE_SECRET_KEY is missing or empty",
+        "A unit test for the schema is added that rejects a missing or empty secret"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "secrets-in-image-and-logs",
+      "prompt": "Security review asked us to check how orders-api handles its secrets before we push the image to the shared registry. Please go through it and fix what you find.",
+      "expected_output": "The agent removes the STRIPE_SECRET_KEY ARG and ENV from the Dockerfile, adds a .dockerignore with .env*, removes the console.log of the ConfigService in the TypeORM factory, keeps the Kubernetes secretRef as the runtime source, does not write real secret values anywhere, and tells the user to rotate the Stripe key if an image with it was ever pushed.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The Dockerfile no longer has ARG STRIPE_SECRET_KEY or ENV STRIPE_SECRET_KEY",
+        "A .dockerignore file is added and lists .env*",
+        "The console.log('Loaded config', config) line in src/app.module.ts is removed and no other log prints config values",
+        "k8s/deployment.yaml still takes secrets from secretRef or secretKeyRef, with no literal secret value added",
+        "No real-looking secret value is written to any file",
+        "The response tells the user to rotate STRIPE_SECRET_KEY if an image built with it was pushed, and does not rotate it itself",
+        "The response explains that ARG and ENV values are readable from the image, for example with docker history or docker inspect"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "config-review-pl",
+      "prompt": "Mamy już zod w projekcie. Podepnij go pod ConfigModule w orders-api tak, żeby aplikacja nie wstała ze złym DATABASE_URL, i sprawdź, czy to naprawdę działa.",
+      "expected_output": "The agent passes a zod schema to ConfigModule.forRoot as validationSchema (supported as Standard Schema in @nestjs/config 12), validates DATABASE_URL as a URL, reads it with getOrThrow or a typed ConfigService in the TypeORM factory, and verifies by booting the built app or calling ConfigModule.forRoot with a malformed DATABASE_URL and showing the 'Config validation error' failure, not only by reading the code.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "ConfigModule.forRoot uses validationSchema with the zod schema",
+        "DATABASE_URL is validated as a URL, for example with z.url()",
+        "The TypeORM factory reads DATABASE_URL with getOrThrow or a typed ConfigService get with infer: true",
+        "The verification runs code (boot of the built app, a test, or a script) with a malformed or missing DATABASE_URL and shows a non-zero exit or a thrown 'Config validation error'",
+        "The verification does not depend on a .env file in the working directory supplying the value",
+        "The response is in Polish"
+      ]
+    }
+  ]
+}
