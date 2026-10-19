@@ -1,0 +1,51 @@
+{
+  "skill_name": "nestjs-connection-draining",
+  "evals": [
+    {
+      "id": 1,
+      "name": "502s-during-rollout",
+      "prompt": "Every time we roll out orders-api, the load balancer logs a burst of 502s for a few seconds. Fix it.",
+      "expected_output": "The agent explains the race between endpoint removal and SIGTERM, adds a preStop delay of about 5 seconds to the container in k8s/deployment.yaml, turns on return503OnClosing in NestFactory.create (the fixture is on Nest 12), makes sure enableShutdownHooks is on and the signal reaches Node, sets terminationGracePeriodSeconds explicitly from a budget, and adds a test or a rollout check that proves no request fails.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "k8s/deployment.yaml has a preStop hook on the orders-api container with a sleep of about 5 seconds, as a sleep action or exec sleep",
+        "NestFactory.create in src/main.ts gets return503OnClosing: true",
+        "src/main.ts calls app.enableShutdownHooks",
+        "k8s/deployment.yaml sets terminationGracePeriodSeconds explicitly",
+        "The response explains that endpoint removal and SIGTERM start at the same time and the endpoint change takes seconds to propagate",
+        "The response says return503OnClosing must be used together with the delay, not instead of it",
+        "forceCloseConnections is not set to true",
+        "An e2e test checks a 503 for a new request and a 200 for an in-flight request during app.close(), or the response gives a rollout check with a request loop"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "invoice-jobs-after-deploy",
+      "prompt": "Right after deploys we sometimes see an invoice email go out twice, and BullMQ shows some jobs as stalled. Can you look into it?",
+      "expected_output": "The agent connects stalled jobs to workers killed by SIGKILL: without enableShutdownHooks, worker.close() never runs, and the grace period may be shorter than a job. It enables shutdown hooks, budgets terminationGracePeriodSeconds for the preStop delay plus the longest job, asks the user for job durations if unknown, explains that a stalled job is retried from the start, and says the job must be safe to run twice (for example check invoiceExported before sending), pointing to the idempotency and scheduled-jobs skills. It also notes the cron runs on every replica as a separate cause of duplicates.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "src/main.ts calls app.enableShutdownHooks so @nestjs/bullmq closes workers with worker.close() on SIGTERM",
+        "The response explains that a job killed mid-run is marked stalled and runs again from the start on another worker",
+        "terminationGracePeriodSeconds is set from a budget that includes the longest invoice job, or the response asks the user for the job duration",
+        "The response says the invoice job must be safe to run twice, for example by checking invoiceExported before sending the email",
+        "The response mentions that the @Cron export runs on all 3 replicas as another source of duplicate invoices, or refers to nestjs-scheduled-jobs for it"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "only-503-pl",
+      "prompt": "Wystarczy, że włączę return503OnClosing w orders-api i deploye przestaną gubić requesty, prawda? Zrób to.",
+      "expected_output": "The agent turns on return503OnClosing but explains in Polish that it alone does not stop failed requests during endpoint propagation, because the 503s still reach clients routed to the pod. It adds the preStop delay and enableShutdownHooks, and keeps terminationGracePeriodSeconds within budget.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "NestFactory.create in src/main.ts gets return503OnClosing: true",
+        "The response says that return503OnClosing alone is not enough because clients still routed to the pod get 503s",
+        "k8s/deployment.yaml gets a preStop delay",
+        "src/main.ts calls app.enableShutdownHooks, because without it the 503 mode never turns on",
+        "The response does not add an in-app delay in beforeApplicationShutdown or Terminus gracefulShutdownTimeoutMs while return503OnClosing is on",
+        "The response is in Polish"
+      ]
+    }
+  ]
+}

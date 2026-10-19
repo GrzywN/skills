@@ -108,7 +108,8 @@ Settle them together, not one by one.
 - Global setup: pipes, guards, and interceptors registered in `main.ts` do not reach e2e tests that build their own app.
   Prefer `APP_PIPE`, `APP_GUARD`, `APP_INTERCEPTOR`, and `APP_FILTER` providers (5, 6, 7, 8, 16).
 - Source maps: the image (2) and the error handling (16) both need `--enable-source-maps`.
-- Health probes: liveness and readiness (17) must not count in latency metrics, and readiness is what the drain (3) relies on.
+- Health probes: liveness and readiness (17) must not count in latency metrics.
+  Kubernetes takes a terminating pod out of its endpoints by itself, so the drain (3) relies on the `preStop` delay, not on the readiness probe.
 
 ## Status table
 

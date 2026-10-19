@@ -1,0 +1,54 @@
+{
+  "skill_name": "nestjs-graceful-shutdown",
+  "evals": [
+    {
+      "id": 1,
+      "name": "slow-deploys-lost-jobs",
+      "prompt": "Every deploy of orders-api takes about 30 seconds per pod, and afterwards a few invoice emails are either missing or sent twice. Nothing in the logs. What's going on?",
+      "expected_output": "The agent explains that the signal never reaches Node in a useful way: CMD npm run start:prod puts npm in front of Node, enableShutdownHooks is not called, so Kubernetes waits the 30 second grace period and sends SIGKILL, killing BullMQ jobs mid-run. It adds app.enableShutdownHooks to main.ts, switches to an exec-form CMD that starts node directly, and handles Node as PID 1 with useProcessExit or an init process. It verifies with SIGTERM against the running app or container.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "src/main.ts calls app.enableShutdownHooks before app.listen",
+        "The Dockerfile CMD is in exec form and starts node directly, for example CMD [\"node\", \"--enable-source-maps\", \"dist/main.js\"]",
+        "Node as PID 1 is handled: enableShutdownHooks gets { useProcessExit: true } or the image uses tini or another init process",
+        "The response explains that npm in CMD does not forward SIGTERM, so the pod is killed with SIGKILL after the 30 second grace period",
+        "The response links the lost or duplicated invoice emails to BullMQ jobs killed mid-run, which are then retried as stalled jobs",
+        "The verification sends SIGTERM to the app or the container and checks the exit code (0 or 143, not 137) or the shutdown log, or gives the exact commands to do so"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "production-dockerfile",
+      "prompt": "Make the orders-api Dockerfile production-grade.",
+      "expected_output": "A multi-stage Dockerfile on a supported Node LTS slim image, npm ci in the build stage with a lockfile (the fixture has none, so the agent creates package-lock.json or tells the user), npm prune --omit=dev, NODE_ENV=production only in the runtime stage, package.json copied for ESM, USER node, exec-form CMD with --enable-source-maps, no secret ARG or ENV, and a .dockerignore.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The Dockerfile has a build stage and a separate runtime stage",
+        "The base image is no longer node:20 and uses a supported LTS major with a pinned major tag such as node:24-slim",
+        "The build stage installs with npm ci, and the missing package-lock.json is created or reported to the user",
+        "ENV NODE_ENV=production is set in the runtime stage and not before npm ci in the build stage",
+        "The runtime stage copies package.json, node_modules and dist from the build stage",
+        "The runtime stage runs as a non-root user, for example USER node",
+        "CMD is exec form and starts node directly with dist/main.js",
+        "ARG and ENV STRIPE_SECRET_KEY are removed",
+        "A .dockerignore is added with node_modules, dist and .env*"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "exit-137-pl",
+      "prompt": "Pody orders-api co kilka godzin się restartują z kodem 137 i w logach nie ma żadnego błędu. Co tu jest nie tak?",
+      "expected_output": "The agent explains that 137 is SIGKILL and, with a 1Gi memory limit and no heap limit, most likely an OOM kill by the kernel before V8 can throw. It tells the user how to confirm OOMKilled in the pod's last state, sets NODE_OPTIONS --max-old-space-size to about 75% of the limit (about 768) in k8s/deployment.yaml, or --max-old-space-size-percentage only after checking the Node version supports it, and suggests alerting on restarts and OOMKilled.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response says exit code 137 means the process got SIGKILL",
+        "The response tells the user to confirm OOMKilled with kubectl describe pod or the container's lastState.terminated.reason",
+        "k8s/deployment.yaml gets a NODE_OPTIONS env with --max-old-space-size between 600 and 800 for the 1Gi limit, or --max-old-space-size-percentage around 75",
+        "If --max-old-space-size-percentage is used, the response states that it needs Node 24.6.0 or 22.21.0 or newer and the image is on such a version",
+        "The response does not only raise the memory limit",
+        "The response suggests an alert on restarts or OOMKilled",
+        "The response is in Polish"
+      ]
+    }
+  ]
+}
