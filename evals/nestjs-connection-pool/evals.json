@@ -1,0 +1,39 @@
+{
+  "skill_name": "nestjs-connection-pool",
+  "evals": [
+    {
+      "id": 1,
+      "name": "too-many-clients-on-deploy",
+      "prompt": "Every deploy of orders-api we get a minute of 500s and the logs say 'remaining connection slots are reserved for roles with the SUPERUSER attribute'. Then it's fine again. What's going on and how do we fix it?",
+      "expected_output": "The agent explains that old and new pods run at the same time during a rolling deploy, computes the peak from the pool of 30 (extra.max) and 3 replicas plus the surge pod and terminating pods against Postgres's usable connections, sets an explicit smaller pool from config (replacing extra.max), names the connections, sets the rollout strategy explicitly, and shows how to verify with pg_stat_activity.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response identifies the deploy window, where old and new pods hold connections at the same time, as the cause",
+        "The response uses the pool size 30 from extra: { max: 30 } in app.module.ts in its calculation",
+        "The calculation includes more than 3 pods during the deploy (the default 25% maxSurge, or terminating pods)",
+        "The response compares the total with max_connections minus reserved connections (97 for a default Postgres) or asks for the real max_connections",
+        "The pool size is set explicitly from config, and extra.max is removed or changed so it no longer overrides it",
+        "The TypeORM config sets applicationName (or application_name) so connections can be attributed in pg_stat_activity",
+        "k8s/deployment.yaml gets an explicit rollingUpdate strategy (maxSurge and maxUnavailable)",
+        "The response shows how to check connections per application with pg_stat_activity"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "autoscale-to-ten",
+      "prompt": "We want to put an HPA on orders-api with maxReplicas 10 and also run the invoice queue processor as its own deployment with 2 replicas. Same Postgres. Can the database take it?",
+      "expected_output": "The agent counts every pool at peak: 10 API pods plus surge and terminating pods, 2 worker pods, the migration job and other clients, multiplies by the explicit pool sizes, compares with the real max_connections (read from the database or asked from the user, not guessed), lowers and separates pool sizes per process type, and recommends PgBouncer or a managed pooler in transaction mode rather than raising max_connections, noting its session-state limits.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The calculation uses maxReplicas 10, not the current 3 replicas",
+        "The calculation adds the deploy surge or terminating pods on top of 10",
+        "The calculation counts the 2 worker pods as separate pools",
+        "The calculation counts the migration job or other clients (admin tools, other services)",
+        "The response reads max_connections from the database, the infrastructure code, or asks the user, and does not present a guessed value as fact",
+        "The pool size becomes an explicit config value that can differ between the API and the worker",
+        "The response recommends a connection pooler (PgBouncer or the provider's) instead of raising max_connections when the total does not fit",
+        "The response mentions a limit of PgBouncer transaction mode (session state such as SET, advisory locks, LISTEN, or prepared statements)"
+      ]
+    }
+  ]
+}
