@@ -58,8 +58,10 @@ Do this before you change any file.
 
 Some fixes use recent APIs, for example `app.useSecurityHeaders()`, `StandardSchemaValidationPipe`, and `return503OnClosing`.
 Each atomic skill names its minimum version and a fallback.
-Use the fallback by default.
+When the project is below that minimum, use the fallback by default.
 If the user agrees to upgrade Nest first, run `nestjs-dependency-updates` before Phase 1 instead of in Phase 4, and say that this changes the order of the post.
+When the installed `@nestjs/*` packages are misaligned (for example `@nestjs/core` older than `@nestjs/common` or the platform package), the app can fail to boot, and no `Verify` step can run.
+Then align them on the current major with `nestjs-dependency-updates` before Phase 1, and say so.
 
 ## Phases
 
@@ -104,6 +106,7 @@ Settle them together, not one by one.
 - Retries: the HTTP client (11), resilience presets (12), and the queue (4) can each retry.
   Pick one layer that owns retries, and check that the product of attempts and timeouts fits the caller's budget.
 - `@Idempotent()` (9) and `@Retry({ idempotent: true })` (12): register `IdempotencyModule` before `ResilienceModule`.
+- `ClassSerializerInterceptor` (8) and `IdempotencyModule` (9): register the serializer as `APP_INTERCEPTOR` in a module imported after `IdempotencyModule`, not in the root module's `providers`, or the app refuses to start.
 - Connections: the pool (14) counts every replica, the surge during a deploy, workers, and the migration job (13).
 - Global setup: pipes, guards, and interceptors registered in `main.ts` do not reach e2e tests that build their own app.
   Prefer `APP_PIPE`, `APP_GUARD`, `APP_INTERCEPTOR`, and `APP_FILTER` providers (5, 6, 7, 8, 16).
@@ -140,12 +143,12 @@ Use these statuses:
 Use it as the definition of done.
 
 - Config is validated at boot, required values use `getOrThrow`, secrets come from a secret store, and the config object is never logged.
-- `enableShutdownHooks()` is on, Node receives SIGTERM directly, and there is an init process.
+- `enableShutdownHooks()` is on, Node receives SIGTERM directly, and Node as PID 1 exits after the hooks (`useProcessExit: true` or an init process).
   The image is multi-stage, runs as non-root, and the heap limit fits the memory limit of the container.
 - Pods drain before closing, and the grace period covers the longest job.
 - Scheduled jobs are guarded with `@OnOneInstance()` or `@WithoutOverlapping()` on a shared lock store, and every job is idempotent.
 - Authentication is global, and every `@Public()` is deliberate.
-- `useSecurityHeaders()` is on, CORS lists its origins, sensitive endpoints are rate-limited, and `trust proxy` matches the number of proxies.
+- Security headers are on (`useSecurityHeaders()`, or Helmet below Nest 12.1), CORS lists its origins, sensitive endpoints are rate-limited, and `trust proxy` matches the number of proxies.
 - A global `ValidationPipe` with `whitelist` or a `StandardSchemaValidationPipe` is registered, list endpoints have a maximum page size, and the body limit is unchanged.
 - Responses are DTOs or serialized classes, and Swagger is not public.
 - Endpoints that must not run twice require an `Idempotency-Key`, backed by a shared store.

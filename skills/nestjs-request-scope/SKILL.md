@@ -19,10 +19,11 @@ Most chains exist only to read one value from the request, and `AsyncLocalStorag
 - [ ] For each hit, search for its class name in constructors, and repeat for every class you find, up to the controllers.
   Include modules that import an exported provider from the chain.
 - [ ] Get the real list from Nest instead of reading by hand.
-  Start the app with `NEST_DEBUG=1` and keep the lines that contain `introspected as request-scoped`.
+  Start the app with `NEST_DEBUG=1` and `NO_COLOR=1` and keep the lines that contain `introspected as request-scoped`.
+  Without `NO_COLOR=1`, color codes split that text and the search finds nothing.
 
   ```bash
-  NEST_DEBUG=1 node dist/main.js 2>&1 | grep 'introspected as request-scoped'
+  NEST_DEBUG=1 NO_COLOR=1 node dist/main.js 2>&1 | grep 'introspected as request-scoped'
   ```
 
   `REQUEST` itself is not printed.
@@ -202,7 +203,7 @@ Detect the package manager from the lockfile and use the Makefile targets when t
    for i in $(seq 1 20); do curl -s -H "x-request-id: req-$i" http://localhost:3000/orders > /dev/null & done; wait
    ```
 
-3. Start with `NEST_DEBUG=1` again and check that `introspected as request-scoped` no longer lists the chain, and that no `Cannot register cron job` warning appears.
+3. Start with `NEST_DEBUG=1 NO_COLOR=1` again and check that `introspected as request-scoped` no longer lists the chain, and that no `Cannot register cron job` warning appears.
 4. Run the project's unit and e2e tests and the build.
 
 ## Gotchas
