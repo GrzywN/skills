@@ -53,7 +53,7 @@ import { DataSource } from 'typeorm';
 const HELD_BY = `key = $1 AND owner = $2 AND expires_at > clock_timestamp()`;
 
 // TypeORM's query() answers a top-level UPDATE with [rows, count]; wrapped in a CTE it
-// answers with the rows, like the INSERT above.
+// answers with the rows, like the INSERT in acquire().
 const updated = (sql: string) => `WITH updated AS (${sql} RETURNING key) SELECT key FROM updated`;
 
 @Injectable()

@@ -194,7 +194,7 @@ After the grace period, `SIGKILL` ends whatever is still running, including queu
    Pass: only `200` codes, no `000`, `502`, `503`, or `504`, through the whole rollout.
 3. Measure the shutdown time: `kubectl logs -f <old-pod>` from `SIGTERM` until the last shutdown log line, and compare it with `terminationGracePeriodSeconds`.
    Pass: the old pods end with exit code `0` or `143`, not `137`.
-4. For a queue, start a job that takes longer than the remaining budget, delete its pod, and watch the job.
+4. For a queue, in staging and with the user's permission, start a job that takes longer than the remaining budget, delete its pod, and watch the job.
    Expect it to run again after its lock expires.
    This shows the budget is real, and why the job must be safe to run twice.
 
