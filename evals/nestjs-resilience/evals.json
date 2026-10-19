@@ -1,0 +1,44 @@
+{
+  "skill_name": "nestjs-resilience",
+  "evals": [
+    {
+      "id": 1,
+      "name": "checkout-survives-carrier-outage",
+      "prompt": "When the shipping carrier is down, checkout in orders-api either errors or spins for ages. Product says checkout must keep working with a flat shipping rate while the carrier is out, but we still want real quotes when it's just slow once in a while.",
+      "expected_output": "The agent registers ResilienceModule with a carrier preset (timeout, retry, circuitBreaker), applies @Resilience('carrier') to GET /shipping/quotes with @Fallback that handles only CircuitOpenError, passes the @Signal() AbortSignal down to the carrier call, makes sure only one layer retries, and proves the behaviour with an e2e test that trips the breaker and one that makes the carrier hang.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "ResilienceModule.forRoot or forRootAsync is imported once, in AppModule, with a preset for the carrier",
+        "The carrier preset has a timeout and a circuitBreaker",
+        "ShippingController.getQuotes has @Resilience with the carrier preset",
+        "The fallback is limited to an open breaker with handleIf and CircuitOpenError, so a single slow call still fails with 504",
+        "The fallback returns a flat rate and does not call the carrier",
+        "The handler takes @Signal() and the signal reaches the fetch or HttpClient call in ShippingService",
+        "If @nestjs/http-client is used for the carrier, its client has retry: false or the preset has no retry, so only one layer retries",
+        "An e2e test with the real AppModule trips the breaker with circuitBreaker('carrier').trip() or produces failures, and asserts the flat-rate body",
+        "The response says that each replica has its own breaker state"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "retries-on-writes-and-jobs",
+      "prompt": "Add @nestjs/resilience to orders-api and put retries on the Stripe payment call in POST /orders/:id/pay and on the invoice mailer in the BullMQ processor.",
+      "expected_output": "The agent explains that a preset retry is skipped on POST and that @Retry({ idempotent: true }) is only safe when the side effect is deduplicated (a Stripe Idempotency-Key, plus @Idempotent with IdempotencyModule imported before ResilienceModule). For the mailer, it uses ResilienceService.preset().execute() inside the processor, because decorators do nothing on providers, and leaves retries to BullMQ attempts. It counts the attempts across layers.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "The response says that on HTTP a resilience retry only runs for GET, HEAD and OPTIONS unless the handler has @Retry({ idempotent: true })",
+        "idempotent: true on the pay handler is used only together with a Stripe Idempotency-Key, or the agent asks before adding it",
+        "If @Idempotent is added, IdempotencyModule is imported before ResilienceModule in AppModule",
+        "No resilience decorator is put on InvoicesProcessor or another provider method",
+        "InvoicesProcessor calls the mailer through ResilienceService.preset(...).execute or a policy from resilience.create, created once in the constructor",
+        "The mailer policy passes the attempt signal to the HTTP call",
+        "The response picks one retrying layer for the mailer (BullMQ attempts or the policy) and turns off the other",
+        "The response gives the total number of attempts per call across layers"
+      ]
+    }
+  ]
+}

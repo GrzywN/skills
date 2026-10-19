@@ -1,0 +1,60 @@
+{
+  "skill_name": "nestjs-outbound-timeouts",
+  "evals": [
+    {
+      "id": 1,
+      "name": "carrier-outage-freeze",
+      "prompt": "During last Friday's carrier outage orders-api stopped answering, even on /orders routes that never talk to the carrier. No pod crashed, they just hung until we restarted them. What happened, and fix it so it can't happen again.",
+      "expected_output": "The agent explains that outbound calls without a timeout hold sockets, memory and database connections until the process stops answering. It finds the fetch calls in ShippingService, OrdersService.pay and InvoicesProcessor, gives each a per-attempt timeout (through @nestjs/http-client or AbortSignal.timeout), keeps POST calls without retries unless an idempotency key is sent, adds a Postgres statement_timeout, writes the retry budget per dependency, and proves it with a hanging upstream.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "The response explains that a call without a timeout keeps a socket, memory or a database connection busy while it waits",
+        "The carrier call in ShippingService.getQuotes gets a timeout, either an HttpClient with timeout or fetch with AbortSignal.timeout",
+        "The Stripe call in OrdersService.pay gets a timeout",
+        "The mailer call in InvoicesProcessor.process gets a timeout",
+        "The Stripe POST is not retried, or is retried only with an Idempotency-Key header and retry methods set for that request",
+        "The TypeORM config sets statement_timeout in extra, or the response adds it through ALTER ROLE in a migration",
+        "The response contains the worst-case time per dependency as attempts times timeout plus backoff",
+        "The verification uses an upstream that never answers, or a stub fetch that waits for the abort signal, and checks the status and the number of attempts"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "http-client-migration-budget",
+      "prompt": "Move all outbound HTTP in orders-api to @nestjs/http-client. Our ingress kills requests after 10 seconds, so nothing should be able to take longer than that.",
+      "expected_output": "One named client per dependency (carrier, Stripe, mailer) with an explicit timeout and retry setting, read from config. The agent computes the worst case from the retry defaults (3 attempts on idempotent methods, backoff from 200 ms, Retry-After up to maxDelay 30 s) and caps it under 10 s with fewer attempts, a lower maxDelay, or a deadline signal. Upstream failures become 502 and 504 instead of 500.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "package.json gets @nestjs/http-client with an exact version, installed with npm, which the README and the Dockerfile use",
+        "Each dependency gets its own HttpClientModule.register or registerAsync call with a name and a timeout",
+        "The services inject the clients with @InjectHttpClient and no raw fetch call is left in src for these dependencies",
+        "The carrier request passes orderId in the query option instead of building the query string by hand",
+        "The response states that the http-client timeout applies per attempt and that retries are on by default",
+        "The response shows a worst-case total under 10 seconds for the carrier client, with the attempts, the timeout and the backoff used to compute it",
+        "The response handles Retry-After, by lowering backoff.maxDelay or by a whole-call deadline with AbortSignal.timeout",
+        "HttpClientError is mapped to 502 or 504 with toHttpException, in the service or in an exception filter",
+        "Setting retry methods to POST on a whole client is not done"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "runaway-queries",
+      "prompt": "Someone ran a big export through the admin endpoint and the query ran for 20 minutes holding a connection. Make sure no query from the app can run forever.",
+      "expected_output": "The agent sets a server-side statement_timeout for the app's Postgres connections through TypeORM extra (or a role setting), explains why query_timeout alone is not enough, gives migrations and long jobs a separate limit, and proves the limit with SELECT pg_sleep through the app's DataSource, expecting error 57014.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "src/app.module.ts passes statement_timeout to the pg pool through TypeORM extra, or a migration sets it with ALTER ROLE",
+        "The timeout value comes from config with a default, not a magic number spread across files",
+        "The response says that query_timeout is client-side and leaves the query running on the server, or uses statement_timeout for that reason",
+        "The response warns that the same limit hits migrations or long jobs and gives them a separate, longer limit",
+        "The verification runs a slow query such as SELECT pg_sleep through the app's connection and expects Postgres error 57014 or a statement timeout error"
+      ]
+    }
+  ]
+}
