@@ -5,7 +5,7 @@
       "id": 1,
       "name": "supported-versions",
       "prompt": "Before orders-api goes to production, make sure it runs on supported versions of Node and Nest and that the dependency setup is something we can keep up to date.",
-      "expected_output": "The agent reads the official Node release schedule instead of relying on memory, finds that node:20 is end-of-life, and moves the Dockerfile, @types/node, and any engines or CI setting to the Active LTS line as one major. It finds that @nestjs/core is pinned to 12.0.1 while @nestjs/common and @nestjs/testing resolve to 12.2.x, looks for a reason for the pin, and aligns the core packages on one exact version. It creates and commits package-lock.json, switches the Dockerfile to npm ci, proposes Renovate or Dependabot after asking which one, and adds npm audit --omit=dev to CI or proposes it.",
+      "expected_output": "The agent reads the official Node release schedule instead of relying on memory, finds that node:20 is end-of-life, and moves the Dockerfile, @types/node, and any engines or CI setting to the Active LTS line as one major. It finds that @nestjs/core, @nestjs/platform-express, and @nestjs/testing are pinned to 12.0.1 while @nestjs/common resolves to 12.2.x, looks for a reason for the pin, and aligns the core packages on one exact version. It creates and commits package-lock.json, switches the Dockerfile to npm ci, proposes Renovate or Dependabot after asking which one, and adds npm audit --omit=dev to CI or proposes it.",
       "files": ["evals/nestjs-production-checklist/files/orders-api"],
       "expectations": [
         "The response checks supported Node lines from nodejs/Release schedule.json, the nodejs/Release README, or nodejs.org/dist/index.json, not from memory",
@@ -24,7 +24,7 @@
       "id": 2,
       "name": "di-errors-after-install",
       "prompt": "Last week a fresh install on a new laptop gave weird 'Nest can't resolve dependencies' errors that we never saw in the old Docker image, which we built back in spring and haven't touched since. What should we change so this doesn't bite us in prod?",
-      "expected_output": "Without the user naming versions, the agent traces the problem to unaligned @nestjs packages and the missing lockfile: npm install resolves different versions on each machine, and @nestjs/core is pinned to 12.0.1 while @nestjs/common floats to 12.2.x. It aligns the core packages, commits a lockfile, uses npm ci in the Dockerfile and CI, checks for duplicate @nestjs/common copies with npm ls --all, and adds scheduled rebuilds with docker build --pull because an image built in spring has not received Node patches.",
+      "expected_output": "Without the user naming versions, the agent traces the problem to unaligned @nestjs packages and the missing lockfile: npm install resolves different versions on each machine, and @nestjs/core, @nestjs/platform-express, and @nestjs/testing are pinned to 12.0.1 while @nestjs/common floats to 12.2.x. It aligns the core packages, commits a lockfile, uses npm ci in the Dockerfile and CI, checks for duplicate @nestjs/common copies with npm ls --all, and adds scheduled rebuilds with docker build --pull because an image built in spring has not received Node patches.",
       "files": ["evals/nestjs-production-checklist/files/orders-api"],
       "expectations": [
         "The response connects the errors to unaligned @nestjs versions or to more than one copy of @nestjs/common or @nestjs/core",
