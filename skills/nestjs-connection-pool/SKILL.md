@@ -58,7 +58,8 @@ Start from the driver default of 10, lower it to fit the budget, and raise it on
 ### 2. Set it explicitly, from config
 
 Read the size from a validated, coerced config value (see `nestjs-config-validation`), so each process type can get its own.
-With TypeORM, replace `extra: { max: 30 }`, because `extra.max` silently overrides `poolSize`:
+With TypeORM, set `poolSize` and remove `max` from `extra`, because `extra.max` silently overrides `poolSize`.
+Keep the other `extra` keys, such as `statement_timeout` from `nestjs-outbound-timeouts`:
 
 ```typescript
 TypeOrmModule.forRootAsync({
@@ -184,7 +185,7 @@ Ask the user before provisioning anything that costs money.
   Named prepared statements need PgBouncer 1.21 or later with `max_prepared_statements` above 0.
   Add `pgbouncer=true` to a Prisma URL only for PgBouncer below 1.21.
 - Prisma Migrate cannot run through PgBouncer; give the CLI a direct URL.
-- Lock and idempotency stores use the app pool: one statement per held lock every `ttl / 3`, and two or three per idempotent request (see `nestjs-scheduled-jobs`, `nestjs-idempotent-writes`).
+- Postgres lock and idempotency stores use the app pool: one statement per held lock every `ttl / 3`, and two or three per idempotent request (see `nestjs-scheduled-jobs`, `nestjs-idempotent-writes`).
 - A client created in a request-scoped provider opens a pool per request (see `nestjs-request-scope`).
 - Tests that create a `DataSource` or `PrismaClient` per test and never close it leak connections, and CI fails with the same errors.
 
