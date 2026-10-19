@@ -195,26 +195,30 @@ Detect the package manager from the lockfile (`package-lock.json`, `pnpm-lock.ya
        await app.close();
      });
 
+     // Replace with the way the existing e2e tests authenticate.
+     const auth = { Authorization: `Bearer ${process.env.E2E_TOKEN}` };
      const validOrder = { customerId: 'c1', customerEmail: 'a@example.com', totalCents: 100 };
 
      it('POST /orders (400) rejects a property that is not in the DTO', async () => {
-       await request(app.getHttpServer()).post('/orders').send({ ...validOrder, status: 'paid' }).expect(400);
+       await request(app.getHttpServer()).post('/orders').set(auth).send({ ...validOrder, status: 'paid' }).expect(400);
      });
 
      it('POST /orders (400) rejects a wrong type', async () => {
-       await request(app.getHttpServer()).post('/orders').send({ ...validOrder, totalCents: 'abc' }).expect(400);
+       await request(app.getHttpServer()).post('/orders').set(auth).send({ ...validOrder, totalCents: 'abc' }).expect(400);
      });
 
      it('GET /orders (400) rejects a page size above the maximum', async () => {
-       await request(app.getHttpServer()).get('/orders?take=100000').expect(400);
+       await request(app.getHttpServer()).get('/orders?take=100000').set(auth).expect(400);
      });
 
      it('GET /orders (200) applies the default page size', async () => {
-       const response = await request(app.getHttpServer()).get('/orders').expect(200);
+       const response = await request(app.getHttpServer()).get('/orders').set(auth).expect(200);
        expect(response.body.length).toBeLessThanOrEqual(20);
      });
    });
    ```
+
+   Seed more than 20 orders before the last case, or it passes without a default.
 
 2. Prove the body limit against the real build, because an e2e app does not run the code in `main.ts`.
    Build with the project's script, start `node dist/main.js`, and send a 200 KB JSON body.
@@ -248,7 +252,7 @@ Detect the package manager from the lockfile (`package-lock.json`, `pnpm-lock.ya
 - `forbidNonWhitelisted` on a query DTO also rejects unknown query parameters, for example `utm_source`.
   Agree on that with the API's clients.
 - `app.useBodyParser('json', { limit: '50mb' })` replaces the limit for every route.
-  It is also typed only on `NestExpressApplication`, so it does not compile on a plain `INestApplication`.
+  It is typed on `NestExpressApplication` and `NestFastifyApplication`, not on a plain `INestApplication`, so it does not compile there.
 
 ## Related skills
 
