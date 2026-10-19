@@ -1,0 +1,66 @@
+{
+  "skill_name": "nestjs-production-checklist",
+  "evals": [
+    {
+      "id": 1,
+      "name": "full-run",
+      "prompt": "orders-api goes to production on Kubernetes next week with 3 replicas behind a load balancer. Go through everything that needs to change before we deploy and fix it.",
+      "expected_output": "The agent surveys the stack first, fills a status table for all 17 checks, asks the user once for the decisions that are theirs (CORS origins, proxy hops, idempotent endpoints, shared store, max_connections, Nest upgrade, paid services), then applies the checks phase by phase in the order of the post, verifies each one, runs build and tests after each phase, and ends with the status table, the changes, the open questions, and the packages it added.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "Before it changes a file, the response lists the stack: Nest version, Express, TypeORM with Postgres, BullMQ, @nestjs/schedule, Kubernetes with 3 replicas and a 1Gi memory limit",
+        "The response has a status table with all 17 checks and a status for each one",
+        "The decisions for the user are asked together in one message, not one at a time across phases",
+        "The agent does not add NestJS Observe or another paid service, and does not add credentials, without a yes from the user",
+        "The checks are applied in the phase order of the post: startup and deploys, the edge, input and output, dependencies, errors and visibility",
+        "ConfigModule gets a validation schema and the config object is no longer logged in app.module.ts",
+        "main.ts calls app.enableShutdownHooks()",
+        "The Dockerfile uses the exec form of CMD, a multi-stage build, a supported Node LTS image, and USER node, and no longer bakes STRIPE_SECRET_KEY in with ARG or ENV",
+        "The invoice cron is guarded so that it runs on one replica only",
+        "Authentication is global and AdminOrdersController is no longer public",
+        "TypeORM synchronize is no longer true for production",
+        "The liveness probe no longer checks the database",
+        "After each phase the agent runs build and tests, or says exactly why it could not",
+        "The final report separates the commands that ran and passed from what is assumed"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "readiness-audit-pl",
+      "prompt": "Czy ta apka jest gotowa na produkcję? Na razie nic nie zmieniaj, chcę tylko wiedzieć, co jest nie tak i w jakiej kolejności to naprawiać.",
+      "expected_output": "The agent runs only Phase 0: it reads the project, runs the Check section of each of the 17 checks, and returns the status table with evidence (file and line) and the phase order for the fixes. It changes no files.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "No file in the project is changed",
+        "The response has a row for each of the 17 checks",
+        "Each failing row names the file where the problem is, for example src/main.ts, src/app.module.ts, Dockerfile, or k8s/deployment.yaml",
+        "The response names the unguarded AdminOrdersController as an auth problem",
+        "The response names the 50mb body parser limit in main.ts as a problem",
+        "The response names fetch calls without a timeout in ShippingService and OrdersService.pay",
+        "The response names the request-scoped RequestLogger that makes OrdersService request-scoped",
+        "The response names the custom AllExceptionsFilter that drops the log of unhandled errors",
+        "The response groups the fixes into the phases of the post"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "version-gate",
+      "prompt": "Harden orders-api for production. We are fine with upgrading packages if needed, but do not do anything that needs a new paid account.",
+      "expected_output": "The agent detects the misaligned @nestjs/* versions and the EOL Node 20 base image, and because the user agreed to upgrades, it runs nestjs-dependency-updates first and says that this changes the order of the post. It does not add NestJS Observe and picks a vendor-neutral path for monitoring.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "The response notes that the @nestjs/* packages are not on matching versions",
+        "The response notes that node:20 is end-of-life",
+        "The dependency upgrade runs before Phase 1, and the response says that this changes the order of the post",
+        "No paid service package or account is added",
+        "The final report lists every added or upgraded package with its version"
+      ]
+    }
+  ]
+}

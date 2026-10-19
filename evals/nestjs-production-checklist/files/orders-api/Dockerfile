@@ -1,0 +1,9 @@
+FROM node:20
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build
+ARG STRIPE_SECRET_KEY
+ENV STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
+EXPOSE 3000
+CMD npm run start:prod
