@@ -1,0 +1,57 @@
+{
+  "skill_name": "nestjs-http-edge-security",
+  "evals": [
+    {
+      "id": 1,
+      "name": "go-live-three-replicas",
+      "prompt": "We go live next week: 3 replicas behind one cloud load balancer, and our React app at https://app.orders.example.com calls this API with cookies. Anything in main.ts or the app module we should change before then? Please fix what you find.",
+      "expected_output": "The agent replaces enableCors() with an explicit origin list from config with credentials, turns on security headers (noticing that @nestjs/core is pinned to 12.0.1 while useSecurityHeaders needs 12.1.0, so it aligns core with common or falls back to helmet), sets trust proxy to the hop count 1 as a number, adds ThrottlerModule with a global ThrottlerGuard, a tighter @Throttle on POST /orders/:id/pay and @SkipThrottle on health, and uses the existing Redis for shared throttler storage or explains that 3 replicas triple the limit.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "app.enableCors() without arguments is replaced by enableCors with an origin list that includes https://app.orders.example.com",
+        "The CORS origins are read from config or an environment variable, not hard-coded only in main.ts",
+        "enableCors sets credentials: true",
+        "The response notes that @nestjs/core 12.0.1 has no useSecurityHeaders (added in 12.1.0)",
+        "Security headers are enabled either by upgrading @nestjs/core to 12.1.0 or later and calling app.useSecurityHeaders(), or with helmet, never by calling useSecurityHeaders while core stays at 12.0.1",
+        "app.set('trust proxy', ...) is called with a number of hops (1), not true",
+        "ThrottlerModule is imported and ThrottlerGuard is registered with APP_GUARD",
+        "POST /orders/:id/pay has a @Throttle with a lower limit than the default",
+        "The health controller has @SkipThrottle()",
+        "Throttler storage uses the existing REDIS_URL, or the response states that with 3 replicas the in-memory limit is 3 times higher"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "audit-log-lb-ip-pl",
+      "prompt": "W logach audytu req.ip to zawsze 10.0.3.17, czyli adres naszego load balancera, a req.protocol to http, chociaż klienci łączą się po HTTPS. Mamy jeden load balancer przed podami. Napraw to w orders-api.",
+      "expected_output": "The agent sets trust proxy on the Express app to the hop count 1 as a number (from config), explains that true would let any client pick its own IP through X-Forwarded-For, and adds a test that sends X-Forwarded-For and checks that the rightmost address is used.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "main.ts calls app.set('trust proxy', ...) on the NestExpressApplication with the number 1, or a config value converted to a number",
+        "trust proxy is not set to true",
+        "The response explains that trust proxy true lets a client choose its own IP with X-Forwarded-For",
+        "A test or a curl command sends a spoofed X-Forwarded-For with several addresses and shows that only the address added by the load balancer is used",
+        "The response mentions that rate limiting by IP depends on this setting",
+        "The response is in Polish"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "rate-limit-payments",
+      "prompt": "Someone is card-testing through POST /orders/:id/pay. Add rate limiting to orders-api that actually holds with our 3 Kubernetes replicas.",
+      "expected_output": "The agent adds @nestjs/throttler with ThrottlerGuard as APP_GUARD and a strict @Throttle on the pay route, stores counters in the Redis from REDIS_URL with a storage package whose peers include Nest 12, handles Redis errors so a dropped connection does not crash the process, sets trust proxy to a hop count, and proves the shared limit with two app instances in one e2e test.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "@nestjs/throttler is added to package.json",
+        "ThrottlerGuard is registered with APP_GUARD",
+        "POST /orders/:id/pay has @Throttle with a limit lower than the default",
+        "ttl values are in milliseconds or use the minutes()/seconds() helpers",
+        "ThrottlerModule gets a storage backed by the Redis from REDIS_URL",
+        "The storage package chosen lists Nest 12 in its peer dependencies, or the install does not use --legacy-peer-deps or --force",
+        "The Redis client has an error listener, or the response explains the crash risk on a dropped connection",
+        "app.set('trust proxy', ...) is set to a number of hops, or the response explains that without it all clients share one limit",
+        "An e2e test starts two app instances on the same Redis and expects 429 once the combined requests pass the limit"
+      ]
+    }
+  ]
+}

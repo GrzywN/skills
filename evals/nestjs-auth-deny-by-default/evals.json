@@ -1,0 +1,56 @@
+{
+  "skill_name": "nestjs-auth-deny-by-default",
+  "evals": [
+    {
+      "id": 1,
+      "name": "orders-export-leak",
+      "prompt": "A customer just told us they could download every order in the system without logging in. Find out how it happened in orders-api and fix it so the next new controller can't repeat it.",
+      "expected_output": "The agent finds that AdminOrdersController and ShippingController have no guard because JwtAuthGuard is applied per controller. It registers the guard globally with APP_GUARD, adds a @Public() decorator read with Reflector.getAllAndOverride, marks only the health check public, removes the per-controller @UseGuards, makes JwtService available to the global guard, flags that the admin export also needs a role check, and adds an e2e test that expects 401 on every non-public route.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response names GET /admin/orders/export (AdminOrdersController) as reachable without authentication",
+        "JwtAuthGuard is registered in AppModule providers with provide: APP_GUARD",
+        "A Public decorator exists that sets metadata with SetMetadata (or Reflector.createDecorator)",
+        "The guard reads the public flag with reflector.getAllAndOverride over context.getHandler() and context.getClass()",
+        "HealthController or its GET handler is marked @Public(), so /health answers without a token",
+        "AdminOrdersController is not marked @Public()",
+        "@UseGuards(JwtAuthGuard) is removed from OrdersController",
+        "JwtModule is registered so that JwtService resolves for the global guard, for example JwtModule.registerAsync with global: true in AppModule",
+        "The response says the admin export also needs an authorization (role) check, or adds one",
+        "The response asks whether GET /shipping/quotes should be public instead of marking it @Public() on its own",
+        "An e2e test with the real AppModule expects 401 without a token on non-public routes"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "expired-token-500",
+      "prompt": "Mobile users whose token has expired get a 500 from GET /orders instead of a 401, so the app never refreshes the token. Fix it.",
+      "expected_output": "The agent catches the verification error in JwtAuthGuard and throws UnauthorizedException, parses the Bearer header without String.replace, adds tests for forged and expired tokens, and points out that the guard is applied per controller, so admin and shipping routes are unauthenticated; it proposes or applies the global guard with @Public().",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "jwt.verifyAsync failures are caught in the guard and rethrown as UnauthorizedException",
+        "The Authorization header is checked for the Bearer scheme instead of using replace('Bearer ', '')",
+        "A test sends an expired or forged token and expects 401",
+        "The response points out that AdminOrdersController and ShippingController have no auth guard",
+        "The response proposes or applies registering the guard globally with APP_GUARD and a @Public() opt-out"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "global-guard-audit-pl",
+      "prompt": "Przed wdrożeniem chcę mieć pewność, że w orders-api każdy endpoint wymaga zalogowania, chyba że świadomie go otworzymy. Zostajemy przy naszym JwtAuthGuard. Health check dla Kubernetesa musi dalej działać. Zrób to i pokaż, jak to sprawdzimy w CI.",
+      "expected_output": "The agent keeps JwtAuthGuard, registers it with APP_GUARD, adds @Public() with getAllAndOverride, marks /health public, and adds an e2e test that lists every controller route, calls it without a token, and expects 401 unless the route is on a reviewed allowlist. It explains that Swagger at /docs is outside the guard.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The project does not switch to @nestjs/authentication or passport",
+        "JwtAuthGuard is registered in AppModule providers with provide: APP_GUARD",
+        "The guard reads the public flag with reflector.getAllAndOverride over context.getHandler() and context.getClass()",
+        "GET /health is marked @Public()",
+        "An e2e test enumerates the controller routes (for example with DiscoveryService) and expects 401 for every route not on an allowlist",
+        "The allowlist in the test contains GET /health and no admin route",
+        "The response says that Swagger UI at /docs is not protected by the global guard",
+        "The response is in Polish"
+      ]
+    }
+  ]
+}
