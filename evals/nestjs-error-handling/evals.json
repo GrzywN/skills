@@ -1,0 +1,54 @@
+{
+  "skill_name": "nestjs-error-handling",
+  "evals": [
+    {
+      "id": 1,
+      "name": "silent-500s",
+      "prompt": "Clients sometimes get a 500 from orders-api, but when we look at the pod logs there is nothing at all for those requests. One client even showed us a 500 body with a raw SQL error in it. Find out why and fix it.",
+      "expected_output": "The agent finds that src/common/all-exceptions.filter.ts is written from scratch: it never logs and sends exception.message of unknown errors to the client. It rewrites the filter to extend BaseExceptionFilter from @nestjs/core, keeps the { success: false, error } shape only for HttpException, and delegates every other exception to super.catch(), which logs it through ExceptionsHandler with the stack and returns an opaque 500. The APP_FILTER registration keeps working because HttpAdapterHost is injected. An e2e test proves the opaque 500, the log entry, and that a body-parser 413 keeps its status.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response names src/common/all-exceptions.filter.ts as the cause of the missing log lines",
+        "The response says the filter sends the message of unknown errors to the client",
+        "AllExceptionsFilter extends BaseExceptionFilter imported from @nestjs/core",
+        "For an exception that is not an HttpException, the filter calls super.catch(exception, host)",
+        "The filter no longer writes exception.message of a non-HttpException into the response body",
+        "HttpException responses keep exception.getStatus() as the status",
+        "The filter is registered with APP_FILTER, or with useGlobalFilters and the HttpAdapterHost httpAdapter passed to the constructor",
+        "A new or changed test asserts that an unknown error gives a 500 whose body does not contain the original error message",
+        "A test asserts that the unknown error is logged, or the response shows the ExceptionsHandler log line from a real run"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "source-maps-pl",
+      "prompt": "Stack trace'y w logach z produkcji pokazują tylko dist/*.js i numery linii, które nic nam nie mówią. Popraw to tak, żeby wskazywały na nasze pliki .ts.",
+      "expected_output": "Node starts with --enable-source-maps, either in an exec-form CMD in the Dockerfile or through NODE_OPTIONS in k8s/deployment.yaml. The TypeScript build emits source maps (sourceMap true) and the .js.map files reach the runtime image. The agent proves it with a real stack trace that names src/*.ts files.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The Dockerfile CMD runs node with --enable-source-maps, or k8s/deployment.yaml sets NODE_OPTIONS to include --enable-source-maps",
+        "If the Dockerfile CMD is changed, it uses the exec form, for example CMD [\"node\", \"--enable-source-maps\", \"dist/main.js\"], and not npm run start:prod",
+        "The response checks or sets sourceMap true in the tsconfig used by nest build",
+        "The response makes sure .js.map files in dist are copied into the image that runs in production",
+        "The response shows or describes a check where a thrown error's stack trace names a src/*.ts file and line",
+        "The response is written in Polish"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "crash-without-trace",
+      "prompt": "Our orders-api pods restart now and then with exit code 1 and the JSON log collector only shows fragments of a stack trace, one line per entry. Make the next crash readable without hiding it.",
+      "expected_output": "The agent recognises an unhandled rejection or uncaught exception that crashes the process. It adds a process-level hook with uncaughtExceptionMonitor (or a handler that logs and then exits non-zero) that logs the error with its stack through the Nest Logger before Nest starts, and keeps Node's crash. It does not add an unhandledRejection listener that keeps the process alive. It proves the behaviour by running a probe rejection against the built code and checking exit code 1 and one fatal log entry with the stack.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The change logs fatal errors with their stack through the Nest Logger or the app logger, not only console.error",
+        "The hook uses process.on('uncaughtExceptionMonitor', ...), or an unhandledRejection or uncaughtException handler that logs and then calls process.exit with a non-zero code",
+        "No added unhandledRejection listener lets the process keep running after it logs",
+        "The hook is installed in main.ts before NestFactory.create",
+        "The response does not set --unhandled-rejections=warn or --unhandled-rejections=none",
+        "The response verifies with a real run in which a rejected promise ends the process with a non-zero exit code after the fatal log entry",
+        "The response suggests alerting on repeated restarts, or links it to the observability check"
+      ]
+    }
+  ]
+}

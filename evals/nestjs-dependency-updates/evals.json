@@ -1,0 +1,56 @@
+{
+  "skill_name": "nestjs-dependency-updates",
+  "evals": [
+    {
+      "id": 1,
+      "name": "supported-versions",
+      "prompt": "Before orders-api goes to production, make sure it runs on supported versions of Node and Nest and that the dependency setup is something we can keep up to date.",
+      "expected_output": "The agent reads the official Node release schedule instead of relying on memory, finds that node:20 is end-of-life, and moves the Dockerfile, @types/node, and any engines or CI setting to the Active LTS line as one major. It finds that @nestjs/core is pinned to 12.0.1 while @nestjs/common and @nestjs/testing resolve to 12.2.x, looks for a reason for the pin, and aligns the core packages on one exact version. It creates and commits package-lock.json, switches the Dockerfile to npm ci, proposes Renovate or Dependabot after asking which one, and adds npm audit --omit=dev to CI or proposes it.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response checks supported Node lines from nodejs/Release schedule.json, the nodejs/Release README, or nodejs.org/dist/index.json, not from memory",
+        "The response states that Node 20 is end-of-life",
+        "The Dockerfile FROM uses a Node major that is Active LTS or Maintenance LTS on the run date, with a pinned major tag such as node:<major>-slim, not latest, current, or lts",
+        "@types/node is changed to the same major as the Dockerfile Node",
+        "The response points out that @nestjs/core 12.0.1 is out of line with @nestjs/common ^12.2.0",
+        "After the change, @nestjs/common, @nestjs/core, @nestjs/platform-express, and @nestjs/testing are on the same version",
+        "A package-lock.json is created, or the response says it must be generated and committed",
+        "The Dockerfile installs with npm ci instead of npm install",
+        "A Renovate or Dependabot config is added, or proposed with a question about which tool the team wants",
+        "npm audit --omit=dev is added to CI or proposed for CI"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "di-errors-after-install",
+      "prompt": "Last week a fresh install on a new laptop gave weird 'Nest can't resolve dependencies' errors that we never saw in the old Docker image, which we built back in spring and haven't touched since. What should we change so this doesn't bite us in prod?",
+      "expected_output": "Without the user naming versions, the agent traces the problem to unaligned @nestjs packages and the missing lockfile: npm install resolves different versions on each machine, and @nestjs/core is pinned to 12.0.1 while @nestjs/common floats to 12.2.x. It aligns the core packages, commits a lockfile, uses npm ci in the Dockerfile and CI, checks for duplicate @nestjs/common copies with npm ls --all, and adds scheduled rebuilds with docker build --pull because an image built in spring has not received Node patches.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response connects the errors to unaligned @nestjs versions or to more than one copy of @nestjs/common or @nestjs/core",
+        "The response says that without a lockfile each install can resolve different versions",
+        "The response runs or proposes npm ls for the @nestjs packages, including a check for duplicate copies",
+        "The core @nestjs packages end up on one exact version",
+        "A lockfile is committed or the response requires it, and the Dockerfile uses npm ci",
+        "The response proposes rebuilding the image on a schedule, with docker build --pull or a Renovate digest pin",
+        "The response flags the node:20 base image as end-of-life"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "upgrade-everything-pl",
+      "prompt": "Zaktualizuj wszystkie zależności orders-api do najnowszych wersji, łącznie z typeorm i TypeScriptem. Zrób to od razu.",
+      "expected_output": "The agent separates in-range updates from major upgrades. It aligns the @nestjs packages within the current major, commits a lockfile, and moves Node to a supported LTS line. For majors (typeorm 0.3 to 1.x, and any other package with a new major such as TypeScript or vitest) it writes a plan with breaking changes and test steps and asks for confirmation before changing them, even though the user said to do it at once. It never runs npm audit fix --force, never picks a Current non-LTS Node line, and does not set up @nestjs/observe.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "typeorm is not moved to a new major without a written plan and a question to the user",
+        "The response lists the breaking upgrades it found and asks for confirmation before applying them",
+        "In-range updates and @nestjs alignment are applied or listed separately from the major upgrades",
+        "The response does not run npm audit fix --force",
+        "The Node version chosen is an LTS line, not a Current line",
+        "The response does not add @nestjs/observe, and passes --no-observe if it runs nest upgrade",
+        "The response is written in Polish"
+      ]
+    }
+  ]
+}

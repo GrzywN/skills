@@ -1,0 +1,54 @@
+{
+  "skill_name": "nestjs-migrations",
+  "evals": [
+    {
+      "id": 1,
+      "name": "schema-for-three-replicas",
+      "prompt": "orders-api already runs in production on Kubernetes and we're scaling it to 3 replicas. Get the database side ready for that - I don't want any surprises on the next deploy.",
+      "expected_output": "The agent turns off synchronize: true in AppModule, adds a TypeORM data source for the CLI with compiled entities and migrations, generates a baseline migration, and explains that the existing production schema (created by synchronize) needs the baseline recorded with migration:run --fake after a drift check proves it matches. Migrations run once per release as a Kubernetes Job (or hook) with the same immutable image tag as the Deployment, not from app startup or migrationsRun. A CI drift check runs migration:generate --check after applying migrations to a throwaway database.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "synchronize: true is removed from the TypeORM options in src/app.module.ts or set to false",
+        "migrationsRun is not set to true anywhere",
+        "A TypeORM DataSource file for the CLI exists and lists entities and migrations",
+        "package.json gets scripts (or a Makefile gets targets) that generate and run migrations with the TypeORM CLI",
+        "The response explains that the existing production schema needs a baseline, recorded with migration:run --fake or an equivalent, without running the create statements",
+        "The response says to prove the production schema matches the entities before the baseline is faked, and asks the user to run it or provide access",
+        "A Kubernetes Job, Helm hook, or CI step runs migration:run before the new Deployment rolls out",
+        "The migration step uses the same image as the release with an immutable tag, and the response flags :latest in k8s/deployment.yaml",
+        "The response adds or proposes a CI drift check, for example migration:generate --check against a throwaway database"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "rename-column",
+      "prompt": "Rename customerEmail to email on the Order entity, we want it in Thursday's release.",
+      "expected_output": "The agent does not rename the column in one release. It explains that during the rolling deploy and on rollback the previous image still reads customerEmail. It plans expand and contract: add a nullable email column and write both (read email with fallback), backfill, switch reads, and drop customerEmail in a later release. The change ships as a reviewed migration file, not through synchronize. It asks the user to confirm the multi-release plan or to accept a non-rollbackable change explicitly.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The change does not drop or rename the customerEmail column in the same release that introduces email",
+        "A migration file adds the email column as nullable or with a default",
+        "The code writes both columns, or reads email with a fallback to customerEmail, in the first release",
+        "The response describes a later release that drops customerEmail after no running or rollback image reads it",
+        "The response explains that the previous image keeps running during the rolling deploy or after a rollback",
+        "synchronize: true is not left on for this change",
+        "The response asks the user to confirm the multi-release plan or to explicitly accept a change that cannot be rolled back by a redeploy"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "rollback-plan-pl",
+      "prompt": "Co zrobimy, jeśli deploy orders-api pójdzie źle w piątek o 17:00? Przygotuj nas na szybki rollback.",
+      "expected_output": "The agent says rollback is a redeploy of the previous image, which needs immutable image tags (the manifest uses :latest) and migrations that are backward compatible with the previous version. It finds that synchronize: true makes a rollback destructive, because the older image syncs the schema back and drops new columns. It turns synchronize off, moves migrations to a deploy step, and does not rely on down-migrations during an incident. It proposes a test that runs the previous release's tests against the migrated schema.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "The response defines rollback as redeploying the previous image, not as running down-migrations",
+        "The response flags image: registry.example.com/orders-api:latest and proposes immutable tags such as a commit SHA",
+        "The response says that synchronize: true lets an older image change the schema on rollback, and turns it off",
+        "The response requires migrations to be backward compatible with the previous version (expand and contract)",
+        "The response proposes checking rollback by running the previous release's tests against the migrated schema",
+        "The response is written in Polish"
+      ]
+    }
+  ]
+}

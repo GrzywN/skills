@@ -1,0 +1,35 @@
+{
+  "skill_name": "nestjs-response-serialization",
+  "evals": [
+    {
+      "id": 1,
+      "name": "partner-integration-review",
+      "prompt": "A logistics partner starts integrating against GET /orders and GET /orders/:id next week, and the API goes to the public internet at the same time. Is there anything in what we return or what main.ts exposes that we shouldn't ship? Fix it.",
+      "expected_output": "The agent sees that the controllers return Order entities, which send internalNotes, stripePaymentIntentId, invoiceExported and customerEmail, and that Swagger is set up unconditionally at /docs. It returns an allowlist (response DTO with a mapper, or @Exclude/@Expose with ClassSerializerInterceptor and @SerializeOptions({ type })), covers the pay and admin endpoints too, and skips Swagger in production or protects all docs paths.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "GET /orders/:id no longer returns the Order entity as-is",
+        "internalNotes is not in any orders response",
+        "stripePaymentIntentId is not in any orders response",
+        "The fix is an allowlist (response DTO, @Expose with class-level @Exclude, or a schema), not only @Exclude on a few entity fields",
+        "POST /orders/:id/pay does not return the full saved entity",
+        "SwaggerModule.setup does not run when NODE_ENV is production, or all of /docs, /docs-json and /docs-yaml are behind auth",
+        "An e2e test checks the exact set of keys in an orders response"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "class-serializer-plain-object",
+      "prompt": "Add @Exclude() to internalNotes and stripePaymentIntentId on the Order entity and turn on ClassSerializerInterceptor globally so those stop leaking. Keep it minimal.",
+      "expected_output": "The agent does what was asked but warns that a denylist leaks new columns and that plain objects (spread, raw queries) skip @Exclude unless @SerializeOptions({ type }) is set, and proposes or applies an allowlist response class. It registers the interceptor as APP_INTERCEPTOR so e2e tests get it.",
+      "files": ["evals/nestjs-production-checklist/files/orders-api"],
+      "expectations": [
+        "ClassSerializerInterceptor is registered as an APP_INTERCEPTOR provider",
+        "The response warns that @Exclude does not apply to plain objects such as spread or raw query results",
+        "The response warns that new entity columns are exposed by default with a denylist, or proposes an allowlist with @Expose",
+        "The response mentions @SerializeOptions({ type: ... }) or a response DTO as the way to cover plain objects",
+        "The response flags that Swagger at /docs is public in production"
+      ]
+    }
+  ]
+}
