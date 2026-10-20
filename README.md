@@ -25,7 +25,7 @@ Each skill uses the [Agent Skills](https://agentskills.io) format and works in e
 | [nestjs-connection-pool](skills/nestjs-connection-pool/SKILL.md) | Sizes the database pool so that all replicas fit, also during a deploy. |
 | [nestjs-request-scope](skills/nestjs-request-scope/SKILL.md) | Finds and removes unintended request-scoped provider chains. |
 | [nestjs-error-handling](skills/nestjs-error-handling/SKILL.md) | Keeps error statuses and logs, and makes stack traces point at the TypeScript source. |
-| [nestjs-observability](skills/nestjs-observability/SKILL.md) | Sets up structured logs, liveness and readiness probes, and monitoring. |
+| [nestjs-observability](skills/nestjs-observability/SKILL.md) | Sets up structured logs, liveness and readiness probes, and monitoring, and helps choose between NestJS Observe, Sentry, an APM, and OpenTelemetry. |
 
 ## Install
 
