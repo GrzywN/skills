@@ -1,7 +1,7 @@
 ---
 name: nestjs-observability
 license: MIT
-description: Makes a NestJS app observable in production - structured JSON logs from ConsoleLogger (json, NEST_LOG_LEVEL, structured params, redact) with a trace id on every line (nestjs-cls request id, OpenTelemetry, or NestJS Observe), liveness without dependencies and readiness with @nestjs/terminus (HealthCheckService, TypeOrmHealthIndicator pingCheck, Kubernetes livenessProbe and readinessProbe), per-route latency and error rates, traces, error grouping with alerts, and BullMQ job and cron visibility (@OnWorkerEvent). Compares a vendor-neutral path (OpenTelemetry or what the project already uses) with NestJS Observe (@nestjs/observe, a paid SaaS with a free tier), and asks before adding any service that needs an account. Use when logs are plain text or console.log, a /health endpoint pings the database for liveness, pods restart when the database blips, you add monitoring, APM, tracing or error tracking, or you cannot tell which route or job is slow. Also use when preparing a NestJS app for production or a deploy.
+description: Makes a NestJS app observable in production - structured JSON logs from ConsoleLogger (json, flattenParams, NEST_LOG_LEVEL, structured params, redact) with log levels used as a contract and a trace id on every line (nestjs-cls, OpenTelemetry, or NestJS Observe), liveness without dependencies and readiness with @nestjs/terminus, per-route p95 and error rates, traces, error grouping with alerts, and BullMQ job wait time, attempts and cron visibility. Helps choose a monitoring tool - NestJS Observe, Sentry (@sentry/nestjs), Datadog, New Relic, or OpenTelemetry - and asks before adding any service that needs an account or money. Use when logs are plain text or console.log, log messages embed ids, a /health endpoint pings the database for liveness, pods restart when the database blips, you add monitoring, APM, tracing or error tracking, compare Observe, Sentry, Datadog and OpenTelemetry, or cannot tell which route or job is slow. Also use when preparing a NestJS app for production or a deploy.
 ---
 
 # Logs, health checks and monitoring
@@ -12,6 +12,14 @@ Health checks must tell "this process is stuck" (liveness) apart from "this pod 
 A liveness probe that checks the database restarts every pod when the database blips, and adds a reconnect storm when it comes back.
 Monitoring must show per-route latency and error rates, traces, grouped errors with an alert on new ones, and jobs and cron runs.
 
+Add the signals in this order, because each one makes the next more useful:
+
+1. Health checks, kept out of every other signal.
+2. JSON logs at production levels, with structured params.
+3. Traces and error tracking together, from one instrumentation, which also puts the trace id on every log line.
+4. Alerts on error rate and p95, after about a week of data to set thresholds against.
+5. Queue monitoring, the day the project adds a queue.
+
 ## Check
 
 1. Open `package.json`.
@@ -21,12 +29,13 @@ Monitoring must show per-route latency and error rates, traces, grouped errors w
 2. Open the deploy config: `k8s/` or Helm values (`livenessProbe`, `readinessProbe`), the `Dockerfile` (`HEALTHCHECK`), or the PaaS file (`fly.toml`, `render.yaml`, `app.yaml`).
 3. Logs: open `main.ts` and read the `logger` option of `NestFactory.create()`.
    Search `src/` for `console.log(`, `console.error(`, `Scope.REQUEST`, `x-request-id`, `ClsModule`, `traceId`, `logLevels` and `NEST_LOG_LEVEL`.
+   Check the log calls against `references/logging.md`: constant messages, data in plain objects, ids and not entities.
 4. Health: open the health controller.
    The liveness route must not touch the database, Redis, or any HTTP dependency.
    The readiness route checks the database with a timeout shorter than the probe's `timeoutSeconds`, and no third-party API.
 5. Monitoring: for each of per-route latency and error rate, traces, error grouping with an alert, and job and cron visibility, write down what provides it or "missing".
 
-Pass: production logs are one JSON object per line at `log` level and above, each request's lines carry the same trace id, liveness has no dependencies, readiness checks the database, and all four monitoring needs are covered or the user has decided on them.
+Pass: production logs are one JSON object per line at `log` level and above, log calls keep data in params, each request's and job's lines carry the same trace id, liveness has no dependencies, readiness checks the database, and the monitoring needs in Apply step 4 are covered or the user has decided on them.
 
 ## Apply
 
@@ -43,6 +52,7 @@ import { TraceIdLogger } from './common/trace-id.logger.js';
 const app = await NestFactory.create(AppModule, {
   logger: new TraceIdLogger({
     json: process.env.NODE_ENV === 'production',
+    flattenParams: true,
     redact: ['authorization', 'password', 'paymentMethodId'],
   }),
 });
@@ -50,8 +60,10 @@ const app = await NestFactory.create(AppModule, {
 
 Set `NEST_LOG_LEVEL=log` in the production environment (the Kubernetes `env`, the PaaS config), so `debug` and `verbose` lines stay out.
 Before `@nestjs/common` 12.2, pass `logLevels: ['log', 'warn', 'error', 'fatal']` instead, and drop `redact`.
+`flattenParams` puts param keys at the top level of the JSON line instead of under `params`.
+Keep the shape the project's log queries already use.
 
-Log with a message and a plain object, which becomes structured `params` (12.0 and later):
+Log a constant message with a plain object, which becomes structured params (12.0 and later):
 
 ```ts
 this.logger.log('Order paid', { orderId: order.id });
@@ -59,14 +71,18 @@ this.logger.error(error, { orderId: order.id });
 ```
 
 An `Error` as the message lands in an `error` field with its stack.
+Use the levels as a contract: `fatal` stops the process, `error` needs someone to act, `warn` was handled, `log` is a business event, and `debug` and `verbose` are off in production.
+Read `references/logging.md` for the rules on params, and fix the existing calls that break them.
 Replace every `console.log` with a `Logger`, and remove any log of the config object (`nestjs-config-validation`).
 
 ### 2. Put a trace id on every line
 
-Use the id of the tracer the project already has.
-With NestJS Observe it is automatic (`attachTraceIdToLogs` defaults to `true`).
+Use the id of the tracer the project already has, because it is also the id of the trace and the error report.
+With NestJS Observe it is automatic for `ConsoleLogger` (`attachTraceIdToLogs` defaults to `true`), also in jobs, cron runs and microservice handlers.
+With pino or winston and Observe, add `TracerService.currentTraceId()` yourself, for example from pino's `mixin`.
 With OpenTelemetry, read it from the active span (see `references/monitoring.md`).
-Without a tracer, keep a request id in `AsyncLocalStorage` with `nestjs-cls` (version 7 needs Node 22):
+Without a tracer, keep a request id in `AsyncLocalStorage` with `nestjs-cls` (version 7 needs Node 22).
+This covers HTTP only, because jobs, cron runs and microservice handlers do not pass through the middleware (step 5 covers jobs):
 
 ```ts
 import { randomUUID } from 'node:crypto';
@@ -160,29 +176,52 @@ On a PaaS, use the readiness path where a failed check only stops traffic, and t
 
 ### 4. Cover monitoring, after asking the user
 
-You need per-route latency and error rates, traces that show which methods and queries took the time, errors grouped into defects with an alert on new ones, and visibility into jobs and cron runs.
+You need:
+
+- Per-route p95 latency and error rate, not averages and not one global number.
+  An average hides one slow request in twenty, and a global number moves when the traffic mix changes.
+- Memory and event loop delay of the process.
+- Traces with spans named after your code, self time per span, and queries and outbound calls as their own spans.
+- Errors grouped into defects, with first-seen time and release, an alert on a new one, and handled errors (an expected 4xx) kept apart from unhandled ones.
+- Jobs and cron runs, with wait time, failures, attempts, and the request that enqueued the job.
+
 Most of this needs a backend.
 Do not sign up for a service, add credentials, or pick a paid plan yourself.
-Show the user the options and ask:
+Read `references/monitoring.md`, ask the user the questions in its "Choose the tool" section, and show the options that fit:
 
-- What the project already uses, configured to cover the four needs.
-- OpenTelemetry, which is vendor-neutral and needs a backend you run or buy.
-- NestJS Observe (`@nestjs/observe`), a hosted service for Nest with a free tier, set up with a module and one `NestFactory.create()` option.
+- What the project already uses, configured to cover the needs above.
+- NestJS Observe (`@nestjs/observe`), a hosted service for Nest backends with a free tier.
+- Sentry (`@sentry/nestjs`), strongest at error tracking and frontends.
+- A full-platform APM (Datadog, New Relic, Dynatrace) for many languages and infrastructure.
+- OpenTelemetry with a backend, for vendor-neutral or self-hosted telemetry.
 
-Read `references/monitoring.md` before you set up either of the last two.
+Set alerts on error rate and p95 per route once there is about a week of data.
 
 ### 5. Make jobs and cron runs visible
 
-Log the outcome of every job with its id, so a failed job is one search away:
+Log the outcome of every job with its id, its attempt, and how long it waited for a worker:
 
 ```ts
+@OnWorkerEvent('completed')
+onCompleted(job: Job) {
+  this.logger.log('Job completed', {
+    jobId: job.id,
+    job: job.name,
+    attemptsMade: job.attemptsMade,
+    waitMs: (job.processedOn ?? job.timestamp) - job.timestamp,
+    durationMs: (job.finishedOn ?? Date.now()) - (job.processedOn ?? job.timestamp),
+  });
+}
+
 @OnWorkerEvent('failed')
 onFailed(job: Job | undefined, error: Error) {
   this.logger.error(error, { jobId: job?.id, job: job?.name, attemptsMade: job?.attemptsMade });
 }
 ```
 
-Put it in the `WorkerHost` class, next to `process()`.
+Put them in the `WorkerHost` class, next to `process()`.
+A rising wait time means too few workers, and a rising `attemptsMade` often means a dependency is failing.
+When the project has no tracer that links jobs to requests, add the trace id to the job data when you enqueue it, and log it from the worker, so a failed job leads back to its request.
 In each `@Cron()` method, log the start, the end and the duration with the same logger.
 Keep failed jobs in Redis long enough to inspect (`removeOnFail` with an age or count, see `nestjs-scheduled-jobs`).
 
@@ -219,6 +258,10 @@ Keep failed jobs in Redis long enough to inspect (`removeOnFail` with an age or 
   Limit its length, or ignore it and always generate the id.
 - `nestjs-cls` mounts as middleware here.
   On Fastify, run Verify step 1, and if the id is missing, use its `guard` or `interceptor` mount instead.
+- A trailing string argument to a log call is the context, not data, and with `flattenParams` a param named `message` or `level` is dropped (`references/logging.md`).
+- A request id from middleware does not reach queue jobs, cron runs, or microservice handlers.
+- Two agents that hook the same database driver (for example Observe next to an APM) can conflict.
+  Test the combination in staging before production.
 
 ## Related skills
 
@@ -229,3 +272,4 @@ Keep failed jobs in Redis long enough to inspect (`removeOnFail` with an age or 
 - `nestjs-scheduled-jobs`: job retention and retries that the job logs report on.
 - `nestjs-resilience`: alert on breaker transitions and bulkhead rejections.
 - `nestjs-auth-deny-by-default`: health routes must be public on purpose.
+- `nestjs-outbound-timeouts`: pass the trace or request id on to other services.

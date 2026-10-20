@@ -55,10 +55,46 @@
         "Log lines carry a request or trace id from AsyncLocalStorage, nestjs-cls or a tracer, not from a request-scoped provider",
         "The console.log of the config object in app.module.ts is removed",
         "No console.log call is left in src",
-        "New log calls pass data as a plain object (structured params) instead of building it into the message string",
+        "New log calls keep the message constant and pass data as a plain object (structured params) instead of building it into the message string or passing it as a trailing string",
+        "Log params carry ids such as orderId, not whole entities such as an Order or a request",
         "authorization or other secret keys are masked with the logger's redact option or not logged",
         "InvoicesProcessor logs failed jobs with the job id, for example with @OnWorkerEvent('failed')",
         "The verification parses each log line as JSON or greps for the trace id of a test request"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "choose-monitoring-tool",
+      "prompt": "We need proper monitoring for orders-api. Our customers use a React web app and a mobile app, and checkout also calls a pricing service written in Go that has to show up in the same traces. Which tool should we pick, and what do you need from me before you set it up?",
+      "expected_output": "The agent asks or reasons through the decision questions (languages in the request path, frontend errors, data residency, infrastructure, existing tools and budget), explains that NestJS Observe alone cannot trace the Go service or the frontends, recommends an option that covers several languages (a full-platform APM or OpenTelemetry) plus Sentry or an equivalent for frontend errors, says Observe could still sit next to them for provider-level spans, and asks the user before creating any account, key, or paid plan. It changes no code before the user decides.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "The response says NestJS Observe does not trace services in other languages such as the Go pricing service",
+        "The response recommends OpenTelemetry or a full-platform APM because the Go service must be in the same trace",
+        "The response names Sentry or another frontend error tracker for the React and mobile apps",
+        "The response asks about data residency, infrastructure to watch, budget, or the tools already in use",
+        "The response says the comparison of tools should be checked against current docs or pricing",
+        "No account, key, credential, or paid service is added, and no monitoring code is written before the user decides"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "invisible-invoice-jobs",
+      "prompt": "Customers say invoices sometimes arrive hours late, and we can't tell whether the jobs are stuck, failing, or just slow. Make that visible.",
+      "expected_output": "The agent adds job logging to InvoicesProcessor with @OnWorkerEvent handlers that log the job id, name, attempt, the wait time before a worker picked it up (processedOn minus timestamp), and the duration, logs failures as errors with the job id, adds a link from the job back to the request or cron run that enqueued it (a trace id in the job data, or a tracer that links them), logs the start, end, and duration of the nightly cron, and recommends alerting on job wait time and failures in the monitoring backend after asking the user which one.",
+      "files": [
+        "evals/nestjs-production-checklist/files/orders-api"
+      ],
+      "expectations": [
+        "InvoicesProcessor logs completed jobs with the job id and the wait time computed from processedOn and timestamp",
+        "InvoicesProcessor logs failed jobs as errors with the job id and attemptsMade",
+        "Job logs use structured params, not ids built into the message string",
+        "Each job carries a trace or request id from the code that enqueued it, or the response names a tracer that links jobs to their request",
+        "The exportYesterday cron logs its start, end, and duration",
+        "The response explains how to tell stuck jobs (rising wait time) from failing jobs (failures and attempts)",
+        "No paid monitoring service is added without asking the user"
       ]
     }
   ]
