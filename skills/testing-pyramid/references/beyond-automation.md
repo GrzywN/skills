@@ -13,6 +13,9 @@ A new project often does not need them.
 They pay off in a codebase that already exists and must be kept in line.
 Pest shows the idea well.
 
+For the rule "no comments in the code", use the `no-comments` skill.
+It removes the comments that exist and adds the check.
+
 ## Manual tests
 
 Some user stories cannot be fully tested in E2E, or are worth testing on the production app.
@@ -45,7 +48,10 @@ The app must help them report and must help you reproduce.
 Documentation is the last form of a test.
 It is hard to verify and it goes out of date without a sound.
 
-- Do not add documentation to the code, except as a last option.
+- Do not add documentation to the code, other than the comments that the `no-comments` skill keeps.
+  A comment is documentation in the code.
+  Put its knowledge in a name, an assertion, a test name, or `docs/`, in that order.
+  The `no-comments` skill has the full list.
 - Documentation must not repeat what the code, the tests, and the assertions already say.
 - The layers of this pyramid are the documentation.
   The code documents itself, and the specification lives in the tests and next to the code it applies to.
@@ -53,9 +59,11 @@ It is hard to verify and it goes out of date without a sound.
   It is best when the specification from all layers can be read in one place that is built from the code.
 - If something is so complex that it needs documentation, or it is a workaround, fix the code.
   The need for an explanation is a sign that a better design exists.
+  If the workaround must stay, write it in `docs/`.
 
 ### Decision records
 
 If the project already has ADRs, use them and keep the name ADR.
 If it has none, do not write one.
 The code shows what is implemented now, and git history records how it got there.
+If the project has no ADRs, a decision that the code cannot show goes to `docs/`.
