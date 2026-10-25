@@ -1,0 +1,83 @@
+{
+  "skill_name": "no-comments",
+  "evals": [
+    {
+      "id": 1,
+      "name": "ask-first-pl",
+      "prompt": "Usuń komentarze z całego codebase i zabezpiecz przed dodawaniem nowych.",
+      "expected_output": "The agent takes an inventory first, then asks the user three questions with a recommended option each: the detector, the cleanup mode, and the enforcement points. It does not delete or move any comment before the answers.",
+      "files": [
+        "evals/no-comments/files/commented-app"
+      ],
+      "expectations": [
+        "The response asks which detector to use and names the bundled script and eslint-plugin-no-comments or Oxlint as options",
+        "The response asks which cleanup mode to use, triage or fast",
+        "The response asks where to enforce the rule: Makefile and CI, an agent hook, a git pre-commit hook, an AGENTS.md line",
+        "Each question has a recommended option",
+        "No source file is changed before the answers",
+        "The response says that decisions, pitfalls, workarounds and external facts move to docs/ and are not deleted"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "install-ratchet-gate",
+      "prompt": "Agents keep adding comments to this repo and the diffs are impossible to review. Add a check that stops new comments, but do not touch the existing ones yet. Use the bundled script, run it from the Makefile and CI, and add a line to AGENTS.md.",
+      "expected_output": "The script and its spec are copied into the project with exact dev dependencies. A Makefile target runs it in ratchet mode against the default branch. CI checks out with full history and runs it on each push or pull request. AGENTS.md has one rule line that links a short rule page in docs/. No existing comment changes, and the gate passes on the current tree.",
+      "files": [
+        "evals/no-comments/files/commented-app"
+      ],
+      "expectations": [
+        "The project has the detector script and its spec, copied from the skill",
+        "package.json has oxc-parser, parse5, postcss and fast-check as dev dependencies with exact versions",
+        "A Makefile target runs the script with --mode ratchet and a --base",
+        "The CI workflow runs the check, and its checkout has fetch-depth: 0",
+        "AGENTS.md has one line about the rule that links a page in docs/",
+        "A rule page in docs/ says which comments stay and where the knowledge of a comment goes",
+        "No existing comment in frontend/ or backend/ is changed or deleted",
+        "The response says the gate passes on the current tree, or shows its output"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "triage-cleanup",
+      "prompt": "Remove every comment from this codebase in triage mode. There is no gate yet, I add it in a later PR. Keep anything we would regret losing.",
+      "expected_output": "Comments that repeat the code, section markers and commented-out code are gone. RETRY_DELAY is renamed so the unit is in the name. The radius comment becomes an assert in clampRadius. The Zaraz banner fact, the unknown-fee decision, the Safari pitfall and the in-memory data decision move to docs/. The TODO stays until the user says if it goes to the issue tracker. Tool directives, the regression marker, the license header and the triple-slash reference stay.",
+      "files": [
+        "evals/no-comments/files/commented-app"
+      ],
+      "expectations": [
+        "The comments '// fetch the places from the API', '// find a place by id', '// load places on mount' and '/** A place on the map. */' are deleted",
+        "The section comments '// Helpers', '<!-- Header -->' and '/* Buttons */' are deleted",
+        "The commented-out sort line in PlaceList.tsx is deleted",
+        "The comment '// start the app' in the inline script of frontend/index.html is deleted",
+        "The knowledge in the JSDoc of isPlaceMarkerVisible ends in a test name or in docs/, or the response says that it conflicts with the PROJ-417 regression test",
+        "RETRY_DELAY is renamed so that the name says milliseconds, and the '// in milliseconds' comment is gone",
+        "clampRadius asserts its range with the shared assert function instead of the comment",
+        "docs/ says that the consent banner comes from Cloudflare Zaraz and that the app must not add its own",
+        "docs/ says that an unknown fee shows as Paid on purpose, and why",
+        "docs/ says that Safari needs the -webkit-backdrop-filter prefix on the sheet",
+        "docs/ says that the places are in memory until the city database API exists, and that scraping the city site is not allowed",
+        "The TODO about retry on 503 is still in the code, and the response asks the user if it goes to the issue tracker",
+        "The biome-ignore directive, the '// regression: PROJ-417' line, the '/*!' license header, the '/// <reference' line and '<!-- prettier-ignore -->' stay",
+        "No code other than comments, renames, assertions, test names and docs is changed"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "regression-fix-gated",
+      "prompt": "This repo forbids code comments. PROJ-417 is back: after you open a place and return to the region picker, its pin is still on the map. Fix it and make sure it can't come back.",
+      "expected_output": "The defect is fixed with no new prose comment. The regression test is in a regression spec file. The agent has no issue tracker access, so it asks the user for the exact title of PROJ-417 and does not invent one. The regression line is the only comment the agent may add, and it adds no --allow entry or ignore for it.",
+      "files": [
+        "evals/testing-pyramid/files/places-app"
+      ],
+      "expectations": [
+        "The defect is fixed: the marker is hidden on region selection also when a place is selected",
+        "The regression test is in a *.regression.spec.ts file",
+        "Either a '// regression: PROJ-417: ...' line is directly above the regression test, or the response asks the user for the exact title before it adds the line",
+        "No new or changed file has a prose comment other than the regression line",
+        "No --allow entry, biome-ignore or other ignore is added for the regression line",
+        "The response asks the user for the exact PROJ-417 title, or says the title is not verified"
+      ]
+    }
+  ]
+}

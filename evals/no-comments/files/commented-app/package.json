@@ -1,0 +1,27 @@
+{
+  "name": "commented-app",
+  "private": true,
+  "scripts": {
+    "test:backend": "jest --config backend/jest.config.ts",
+    "test:frontend": "vitest run --dir frontend",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.1.6",
+    "@nestjs/core": "11.1.18",
+    "@nestjs/platform-express": "11.1.6",
+    "@sentry/browser": "10.72.0",
+    "@sentry/nestjs": "10.72.0",
+    "preact": "10.27.3",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.4",
+    "@nestjs/testing": "11.1.6",
+    "@playwright/test": "1.62.0",
+    "jest": "30.4.2",
+    "supertest": "7.1.4",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
