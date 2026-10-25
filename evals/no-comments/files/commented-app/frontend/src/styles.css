@@ -1,0 +1,10 @@
+/* Buttons */
+.button {
+  padding: 0.5rem 1rem;
+}
+
+.place-sheet {
+  /* Safari 17 ignores backdrop-filter without the prefix, and the sheet turns opaque. */
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
