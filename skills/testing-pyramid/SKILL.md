@@ -129,7 +129,9 @@ The format is `// regression: <exact issue key>: <exact issue title>`.
 Read the key and the title from the issue tracker, for example Jira, before you write the comment.
 If you cannot read them, ask the user.
 Do not write the title from memory, because a wrong title sends the next reader to the wrong issue.
-Add the comment also when the project forbids comments, and add an ignore for the tool that complains.
+Add the comment also when the project forbids comments.
+The `no-comments` skill allows this line, so do not add an ignore for it.
+If the project checks comments with another tool, add `regression:` to the allowlist of that tool.
 
 ## Gotchas
 
@@ -142,6 +144,7 @@ Add the comment also when the project forbids comments, and add an ignore for th
 - Do not add golden screenshot tests to a project whose design still changes.
 - Do not write an ADR in a project that has none.
   The code shows the current state and git history records the decisions.
+  A decision that the code cannot show goes to `docs/`.
 
 ## Read next
 
