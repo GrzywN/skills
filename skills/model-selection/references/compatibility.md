@@ -42,6 +42,10 @@ Opus 5.5, Sonnet 5.5, Haiku 5.5 and Fable 5.2 support computer use only through 
 - Remove non-default `temperature`, `top_p` and `top_k` values, because they return a 400 error.
 - End `messages` with a user turn.
   A final assistant turn for the model to continue also returns a 400 error.
+  Put the output format in the prompt, or use a strict tool.
+
+The article gives these three rules for the move to Haiku 5.5.
+For a move from Haiku 4.5 to a different model, read the [migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) of that model, and apply the rule for the strictest model below.
 
 ### Safety fallbacks
 
@@ -57,9 +61,10 @@ Then a step can move up or down a tier with no code change.
 
 - Keep the history append-only.
 - Send `tool_choice: auto` with strict tools.
+- Send no `budget_tokens`, no non-default `temperature`, `top_p` or `top_k`, and no final assistant turn.
 - Read content blocks by `type`.
 - Write prompts and tool descriptions that are precise enough for the most literal model.
 - When the routing rule is simple, such as one model for each type of step, let code pick the model and do not ask a model to pick.
 
-After the code change, measure the candidates on real tasks before the cutover.
+After the code change, measure the candidates on real tasks before you switch.
 The steps are in "Measure on your own work" in `SKILL.md`.

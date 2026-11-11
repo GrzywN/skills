@@ -117,7 +117,7 @@ Before you add an advisor:
 ## A lead with cheaper workers
 
 This pattern is for work that is bigger than one context window.
-A top-tier model leads, splits the task, gives the pieces to many cheaper workers in parallel, and merges the results.
+A top-tier model, Opus 5.5 or Fable 5.2, leads, splits the task, gives the pieces to many cheaper workers in parallel, and merges the results.
 
 On an internal defect-search benchmark over about 22 million tokens of source code, an Opus 5.5 lead over Sonnet 5.5 workers, up to 25 at a time, cost about a third less than Opus 5.5 alone at its default effort.
 It scored about the same.

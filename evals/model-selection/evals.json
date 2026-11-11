@@ -32,22 +32,24 @@
         "The Fable 5.2 test starts at medium effort, or at an effort level below the high that Opus 5.5 ran at",
         "The response says that a higher effort level does not give a model knowledge or skill that it does not have",
         "The response says that past high effort one more level can cost as much as a bigger model, or cites that Fable 5.2 at high scored about level with Opus 5.5 at max for about half the cost per task",
-        "The response gives the order: self-verification, then effort, then the next model up"
+        "The response puts self-verification before any change of effort or model"
       ]
     },
     {
       "id": 3,
       "name": "subagent-definitions",
       "prompt": "Set up Claude Code subagents for this repo. I want one that reads the CI logs and reports the failing tests, one that explores the codebase to find where something is implemented, and one that fixes the failing tests. We are on the Anthropic API. Keep it cheap, but do not trade away correctness.",
-      "expected_output": "Files in .claude/agents/. The log reader has model: haiku and no tool that edits files. The exploration subagent has the name Explore and model: haiku, so that it replaces the built-in one that runs on the session model. The work that edits code is not on Haiku: it stays on the main session, or its subagent inherits the session model. The response explains the rule: a small model for work where a mistake is cheap to spot, the main model for edits and judgment calls.",
-      "files": [],
+      "expected_output": "Files in .claude/agents/. The log reader has model: haiku and no tool that edits files. The exploration subagent has the name Explore and model: haiku, so that it replaces the built-in one that runs on the session model. The work that edits code is not on Haiku: it stays on the main session, or its subagent inherits the session model with model: inherit. The response explains the rule: a small model for work where a mistake is cheap to spot, the main model for edits and judgment calls.",
+      "files": [
+        "evals/testing-pyramid/files/places-app"
+      ],
       "expectations": [
         "A subagent definition for log reading exists in .claude/agents/ with model: haiku",
         "The log reading subagent has no tool that edits files, or its prompt says not to edit files",
         "A subagent definition with the name Explore exists and sets a small model, haiku or sonnet",
         "The response says that the built-in Explore subagent runs on the session model, or that the Explore definition replaces the built-in one",
         "No subagent that edits code has model: haiku",
-        "The code that fixes the tests stays on the main session or on a subagent that inherits the session model, or the response says why a smaller model is acceptable for it",
+        "The subagent that fixes the tests has model: inherit or no smaller model than the session, or the fix stays on the main session, or the response says that a smaller model is an exception for well-scoped work with a test and that it must be measured first",
         "The response states the rule: a small model where a mistake is cheap to spot, the main model for code edits and judgment calls",
         "The response says that the haiku alias needs Claude Code v2.1.293 or later to resolve to Haiku 5.5, or names ANTHROPIC_DEFAULT_HAIKU_MODEL to pin it"
       ]
@@ -55,7 +57,7 @@
     {
       "id": 4,
       "name": "api-migration-mixed",
-      "prompt": "Our ticket pipeline runs on Haiku 4.5 through the Messages API and has three steps. The classify step sends temperature 0.2 and prefills the assistant turn with '{\"category\":' so that the model continues the JSON. The summarize step sends thinking: {type: 'enabled', budget_tokens: 4000}. The draft-reply step forces a tool with tool_choice: {type: 'tool', name: 'draft_reply'} and reads response.content[0].input. We want classify and summarize on Haiku 5.5 and draft-reply on Sonnet 5.5. What do we have to change, and how do we pick the model per step?",
+      "prompt": "Our ticket pipeline runs on Haiku 4.5 through the Messages API and has three steps. The classify step sends temperature 0.2 and prefills the assistant turn with '{\"category\":' so that the model continues the JSON. The summarize step sends thinking: {type: 'enabled', budget_tokens: 4000}. The draft-reply step forces a tool with tool_choice: {type: 'tool', name: 'draft_reply'} and reads response.content[0].input. We want classify and summarize on Haiku 5.5 and draft-reply on Sonnet 5.5. What do we have to change, and how should the pipeline route each step to its model?",
       "expected_output": "A list of the changes that the two models need. Classify: the temperature goes, and the messages end with a user turn with no assistant prefill. Summarize: budget_tokens becomes an effort level. Draft-reply: tool_choice becomes auto with a strict tool and a prompt that says when to use it, and the code reads content blocks by type. The step type picks the model in code. The response also says to measure on real tasks before the cutover.",
       "files": [],
       "expectations": [
@@ -78,14 +80,31 @@
       "files": [],
       "expectations": [
         "The response says that a lead with cheaper workers fits work that is bigger than one context window and splits into independent pieces",
-        "The response says that the pattern does not pay for one chain of dependent steps or for work that fits in one context window",
         "The response says to take a sample of real audit tasks and write an outcome check for each one",
         "The response says to run each candidate at two or three effort levels",
         "The response says to run each candidate in its own session, so that the runs do not share a cache",
-        "The response says to record the cost of each completed task from the usage field of the responses",
+        "The response says to record the cost of each completed task, from the usage field of the responses or from the cost that each run reports",
         "The response says to plot the score against the spend and to keep the mixed setup only if it beats every single-model point",
         "The response says to run the winner in shadow on a slice of real work before the cutover",
         "The response treats the one-third saving as a published result to verify, not as a fact about this workload"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "too-slow-too-expensive",
+      "prompt": "Our in-app support chat runs on Opus 5.5 at high effort through the API. Users wait about 20 seconds for a reply, and the bill doubled last month. Most questions are simple account and billing how-tos, a few are real troubleshooting. What do we change first?",
+      "expected_output": "The recommendation comes first, in the report shape: model, effort, why, what to try when it falls short, how to set it. A person waits for each reply and most questions are simple, so the chat moves to Sonnet 5.5 at low or medium, with Haiku 5.5 as the option for the simple questions at volume. The response says that a lower effort level is the smaller step, names fast mode as the way to pay for speed and keep the capability, and says to measure on real conversations before the switch.",
+      "files": [],
+      "expectations": [
+        "The response recommends Sonnet 5.5 for the chat, at low or medium effort",
+        "The response names Haiku 5.5 as an option for the simple questions at volume",
+        "The response gives the reason as a trait of this task: a person waits for each reply, or most questions are simple",
+        "The response says that a lower effort level is a step to try, with its cost or accuracy trade-off",
+        "The response says that fast mode on Opus 5.5 gives speed at a premium price, so it does not fix the bill",
+        "The response says what to do when the smaller model falls short on the troubleshooting questions",
+        "The response says how to set the model and the effort on the API: the model ID and output_config.effort",
+        "The response says to measure on real conversations with an outcome check, or to run in shadow, before the switch",
+        "The recommendation comes before the reasons"
       ]
     }
   ]
