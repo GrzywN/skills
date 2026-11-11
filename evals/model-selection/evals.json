@@ -1,0 +1,92 @@
+{
+  "skill_name": "model-selection",
+  "evals": [
+    {
+      "id": 1,
+      "name": "backlog-triage-pl",
+      "prompt": "Mam na jutro pięć zadań dla agentów w Claude Code: (1) otagowanie 40 tys. zgłoszeń supportu jedną z 12 kategorii, (2) fix buga w paginacji, mam już failujący test, (3) migracja całego monorepo z JavaScript na TypeScript, ok. 900 plików, (4) nowa funkcja subskrypcji rozłożona na kilka PR-ów, (5) codzienny agent, który robi przegląd PR-ów według stałej checklisty. Jaki model i jaki effort do każdego?",
+      "expected_output": "One table with a model and an effort level for each of the five tasks. Tagging goes to Haiku 5.5 at medium, the scoped bug fix to Sonnet 5.5 at medium, the monorepo migration to Fable 5.2 at medium then high, the multi-PR feature to Opus 5.5 at medium then high, and the repeated review agent to Sonnet 5.5 at medium. Each row names the trait of the task that decided the choice and what to try when the result falls short.",
+      "files": [],
+      "expectations": [
+        "The ticket tagging task gets Haiku 5.5",
+        "The pagination bug fix with a failing test gets Sonnet 5.5 at medium effort",
+        "The JavaScript to TypeScript migration of the monorepo gets Fable 5.2, starting at medium effort",
+        "The subscription feature over several pull requests gets Opus 5.5 at medium effort",
+        "The daily pull request review agent gets Sonnet 5.5 at medium effort",
+        "Each task has an effort level, not only a model",
+        "The response says what to try when a result falls short, and puts self-verification or a higher effort level before a bigger model",
+        "The response gives the reason for each choice as a trait of that task, such as volume, a clear scope, or the size of the migration",
+        "The response does not recommend Mythos 5.2 or a model older than the 5.5 and 5.2 generation"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "escalate-past-high",
+      "prompt": "We run Opus 5.5 at high effort on a performance optimization of our query planner. It keeps producing patches that pass the unit tests and then regress p95 latency in staging. My teammate wants to set the effort to max and let it run overnight. Good idea?",
+      "expected_output": "The response says no to max as the first step. It first gives the model a way to verify its own work on the real target, such as a benchmark script that measures p95, because the unit tests do not check the thing that fails. Then, because the effort is already at high, it recommends a test of Fable 5.2 at a lower effort level before xhigh or max, and says that effort does not add knowledge or skill.",
+      "files": [],
+      "expectations": [
+        "The response does not recommend max effort on Opus 5.5 as the next step",
+        "The first recommendation is a way for the model to verify its own work on the failing metric, such as a benchmark or a script that measures p95 latency",
+        "The response recommends a test of Fable 5.2 before Opus 5.5 goes past high effort",
+        "The Fable 5.2 test starts at an effort level below max, such as medium or high",
+        "The response says that a higher effort level does not give a model knowledge or skill that it does not have",
+        "The response says that past high effort one more level can cost as much as a bigger model, or cites that Fable 5.2 at high matched Opus 5.5 at max for about half the cost per task",
+        "The response gives the order: self-verification, then effort, then the next model up"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "subagent-definitions",
+      "prompt": "Set up Claude Code subagents for this repo. I want one that reads the CI logs and reports the failing tests, one that explores the codebase to find where something is implemented, and one that fixes the failing tests. We are on the Anthropic API. Keep it cheap, but do not trade away correctness.",
+      "expected_output": "Files in .claude/agents/. The log reader has model: haiku and read-only tools. The exploration subagent has the name Explore and model: haiku, so that it replaces the built-in one that runs on the session model. The work that edits code is not on Haiku: it stays on the main session, or its subagent inherits the session model. The response explains the rule: a small model for work where a mistake is cheap to spot, the main model for edits and judgment calls.",
+      "files": [],
+      "expectations": [
+        "A subagent definition for log reading exists in .claude/agents/ with model: haiku",
+        "The log reading subagent has no tool that edits files, or its prompt says not to edit files",
+        "A subagent definition with the name Explore exists and sets a small model, haiku or sonnet",
+        "The response says that the built-in Explore subagent runs on the session model, or that the Explore definition replaces the built-in one",
+        "No subagent that edits code has model: haiku",
+        "The code that fixes the tests stays on the main session or on a subagent that inherits the session model, or the response says why a smaller model is acceptable for it",
+        "The response states the rule: a small model where a mistake is cheap to spot, the main model for code edits and judgment calls",
+        "The response says that the haiku alias needs Claude Code v2.1.293 or later to resolve to Haiku 5.5, or names ANTHROPIC_DEFAULT_HAIKU_MODEL to pin it"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "api-migration-mixed",
+      "prompt": "Our ticket pipeline runs on Haiku 4.5 through the Messages API and has three steps. The classify step sends temperature 0.2 and prefills the assistant turn with '{\"category\":' so that the model continues the JSON. The summarize step sends thinking: {type: 'enabled', budget_tokens: 4000}. The draft-reply step forces a tool with tool_choice: {type: 'tool', name: 'draft_reply'} and reads response.content[0].input. We want classify and summarize on Haiku 5.5 and draft-reply on Sonnet 5.5. What do we have to change, and how do we pick the model per step?",
+      "expected_output": "A list of the changes that the two models need. Classify: the temperature goes, and the messages end with a user turn with no assistant prefill. Summarize: budget_tokens becomes an effort level. Draft-reply: tool_choice becomes auto with a strict tool and a prompt that says when to use it, and the code reads content blocks by type. The step type picks the model in code. The response also says to measure on real tasks before the cutover.",
+      "files": [],
+      "expectations": [
+        "The response says to replace budget_tokens with an effort level on Haiku 5.5",
+        "The response says to remove the non-default temperature, because it returns a 400 error on Haiku 5.5",
+        "The response says to remove the assistant prefill and end messages with a user turn, because a final assistant turn returns a 400 error",
+        "The response says that tool_choice of type tool returns a 400 error on Sonnet 5.5",
+        "The replacement for forced tool use is tool_choice auto, a tool marked strict: true, and a prompt that says when to use the tool",
+        "The response says to read content blocks by type and not by index, because a response can begin with a thinking block",
+        "The model for each step is picked in code by the step type, not by a model",
+        "The response names the API model IDs claude-haiku-5-5 and claude-sonnet-5-5",
+        "The response says to test or measure on real tasks, or to run in shadow, before the cutover"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "measure-mixed-setup",
+      "prompt": "Each week we run a dependency and license audit over 14 repositories, about 30 million tokens of source. Today it is one Opus 5.5 agent per repository. Someone on the team says an Opus lead with Sonnet workers would cost a third less. How do we find out if that is true for us before we commit?",
+      "expected_output": "The response says that the pattern fits, because the work is bigger than one context window and splits into independent pieces, and that the published result is a starting point and not a proof. It then gives the measurement: a sample of real tasks with an outcome check each, each candidate at two or three effort levels in separate sessions, the cost per completed task from the usage field, a chart of score against spend, and a shadow run before the cutover.",
+      "files": [],
+      "expectations": [
+        "The response says that a lead with cheaper workers fits work that is bigger than one context window and splits into independent pieces",
+        "The response says that the pattern does not pay for one chain of dependent steps or for work that fits in one context window",
+        "The response says to take a sample of real audit tasks and write an outcome check for each one",
+        "The response says to run each candidate at two or three effort levels",
+        "The response says to run each candidate in its own session, so that the runs do not share a cache",
+        "The response says to record the cost of each completed task from the usage field of the responses",
+        "The response says to plot the score against the spend and to keep the mixed setup only if it beats every single-model point",
+        "The response says to run the winner in shadow on a slice of real work before the cutover",
+        "The response treats the one-third saving as a published result to verify, not as a fact about this workload"
+      ]
+    }
+  ]
+}
