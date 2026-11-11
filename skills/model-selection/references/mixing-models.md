@@ -39,9 +39,12 @@ Read the logs you're given. For each failure, report the file, the test name and
 The rule for the model of a subagent:
 
 - A mistake that is cheap to spot goes to a small model: find files, run tests, read logs.
-- A code edit or a judgment call stays on the main model.
+  Start on Haiku 5.5.
 - A small model that misreads a search result is not free: the main model opens the wrong file and spends tokens on it.
-  When the search needs judgment, use Sonnet 5.5 and not Haiku 5.5.
+  When you see that happen, move the subagent to Sonnet 5.5.
+- A code edit or a judgment call stays on the main model.
+  A subagent that edits code inherits the model of the session, with `model: inherit`.
+  Put it on a smaller model only for well-scoped work with a test that checks the result, never on Haiku 5.5, and measure it first.
 
 Three facts about Claude Code change what a definition does:
 

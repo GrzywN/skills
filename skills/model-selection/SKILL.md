@@ -101,8 +101,11 @@ The numbers are in `references/models.md`.
 ## Models for subagents and workers
 
 - Put a small model on work where a mistake is cheap to spot: find files, run tests, read logs, summarize.
+  Start that work on Haiku 5.5.
+  Move it to Sonnet 5.5 when its mistakes cost the main model real work, for example when the main model opens the wrong files after a search.
 - Keep code edits and judgment calls on the main model.
-  When a small model misreads a search result, the main model opens the wrong file and pays for it.
+  A subagent that edits code inherits the model of the session, with `model: inherit`.
+  Put it on a smaller model only for well-scoped work with a test that checks the result, never on Haiku 5.5, and measure it first.
 - For work bigger than one context window, a top-tier model leads and many cheaper workers run in parallel.
   For one chain of dependent steps, or work that fits in one context window, use one agent, because the planning and merging cost more than they save.
 - When the routing rule is simple, such as one model for each type of step, let code pick the model and do not ask a model to pick.
