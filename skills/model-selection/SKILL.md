@@ -1,7 +1,7 @@
 ---
 name: model-selection
 license: MIT
-description: Picks the Claude model and the effort level for a task - Haiku 5.5, Sonnet 5.5, Opus 5.5 or Fable 5.2 at low, medium, high, xhigh or max - from the kind of work, its volume, how long a person waits, and whether the result can be checked. Covers what to try before a bigger model (self-verification, then effort, then the model), models for subagents and parallel workers, when to switch models in a session, cost per finished task, the API differences to test before a migration, and how to measure candidates on your own tasks. Use when the user asks which model or effort to use, when you choose a model for a subagent, an agent definition, a scheduled task, a CI job or an API call, when a model is too slow, too expensive or not good enough, when you plan a multi-agent setup, or when code moves from one Claude model to another, also when the user does not say "model selection".
+description: Picks the Claude model and the effort level for a task (Haiku 5.5, Sonnet 5.5, Opus 5.5 or Fable 5.2 at low, medium, high, xhigh or max) from the kind of work, its volume, how long a person waits, and whether the result can be checked. Covers what to try before a bigger model (self-verification, then effort, then the model), models for subagents and parallel workers, when to switch models in a session, cost per finished task, the API differences to test before a migration, and how to measure candidates on your own tasks. Use when the user asks which Claude model or effort to use, when you choose a model for a subagent, an agent definition, a scheduled task, a CI job or a Claude API call, when a Claude model is too slow, too expensive or not good enough, when you plan a setup with several Claude agents, or when code moves from one Claude model to another, also when the user does not say "model selection". Not for models of other providers, machine-learning models or data models.
 ---
 
 # Model selection
@@ -14,6 +14,7 @@ So pick the model and the effort level from the task.
 This skill holds the Claude lineup of 2026-11-09, from [Which Claude model should you build with?](https://claude.dev/blog/which-claude-model-should-you-build-with/) by Addy Osmani.
 Model names, prices and defaults change.
 When the user names a model that is not in this skill, or a decision depends on an exact price, check [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) and [Pricing](https://platform.claude.com/docs/en/about-claude/pricing) first, and say which facts you checked.
+When you cannot open the docs, say that the numbers are from 2026-11-09.
 
 ## The lineup
 
@@ -21,7 +22,7 @@ When the user names a model that is not in this skill, or a decision depends on 
 | --- | --- | --- | --- | --- |
 | Haiku 5.5 | `haiku` | `claude-haiku-5-5` | High-volume, cost-sensitive tasks | $0.10 / $0.50 up to 100K tokens of prompt, $0.50 / $2.50 over 100K |
 | Sonnet 5.5 | `sonnet` | `claude-sonnet-5-5` | Fast, capable help with well-scoped tasks | $2 / $10 |
-| Opus 5.5 | `opus` | `claude-opus-5-5` | The daily driver for complex coding and knowledge work | $4 / $20 |
+| Opus 5.5 | `opus` | `claude-opus-5-5` | Complex coding and knowledge work, each day | $4 / $20 |
 | Fable 5.2 | `fable` | `claude-fable-5-2` | The most ambitious, open-ended technical work | $8 / $40 |
 
 The effort levels are `low`, `medium`, `high`, `xhigh` and `max`.
@@ -53,17 +54,20 @@ Then move down, or up, only for a reason from the table below.
 | Deep research, scientific or quantitative analysis | Fable 5.2 | `medium`, then `high` | Built for the hardest technical projects in coding, finance and the sciences |
 | You are not sure yet | Opus 5.5 | `medium` | The default in Claude Code, and the starting point in the platform docs |
 
+"Then `high`" means: raise the effort when the result at the first level falls short.
 On the API, Sonnet 5.5 and Fable 5.2 default to `high`, so set the effort in the request when the table says `medium`.
 
 Check these points before you answer, because they move a task to a different row:
 
 - A clear spec does not make a task easy.
   A migration or a performance optimization can have a clear spec and still need Opus 5.5, or Fable 5.2 when it is a major one.
-- A complex financial model, or a document built from a large pile of source material, starts on Opus 5.5 and not on Sonnet 5.5.
-- A long run that nobody watches goes to Fable 5.2.
+  A change is major when it touches most of the codebase, such as a move of a whole project from JavaScript to TypeScript.
+- A complex financial model, or a document built from a large amount of source material, starts on Opus 5.5 and not on Sonnet 5.5.
+- A long, open-ended run that nobody watches moves up from Opus 5.5 to Fable 5.2.
+  A repeated, well-defined run, such as a nightly review or a batch of classifications, stays on its row.
 - The hardest technical projects in coding, finance and the sciences go to Fable 5.2.
-- When a person waits for each reply, latency counts.
-  Start on Sonnet 5.5 at `low` or `medium`.
+- When a person waits for each reply, decide how long they can wait before you pick.
+  When the wait counts for more than the last points of accuracy, as in a chat product, start on Sonnet 5.5 at `low` or `medium`.
 - A small model does well on high-volume work with outputs that can be checked.
   It is less suited to a long agentic loop.
 - When every call needs a prompt over 100K tokens, Haiku 5.5 bills at five times its short-prompt rate.
@@ -75,13 +79,14 @@ Take these steps in order, and stop at the first one that fixes the result.
 
 1. Check that the model can verify its own work, with a test, a build, or a script that calls the endpoint.
    This often costs less and adds less latency than a higher effort level.
-2. Raise the effort one level.
+2. Raise the effort one level, up to `high`.
 3. Move to the next model up, and start it at a lower effort level than you used on the smaller model.
 
-Effort is a finer dial than the model, for both cost and capability.
+Effort is a finer control than the model, for both cost and capability.
 A higher level helps when the model must think longer, call more tools, or check its work more.
 It adds latency, and it does not give the model knowledge or skill that it does not have.
 For that, move up a model.
+So when a higher level gives the same kind of wrong result, go to step 3.
 
 Past `high`, one more effort level can cost as much as a bigger model.
 So when Opus 5.5 at `high` still falls short, test Fable 5.2 at a lower effort before you go to `xhigh` or `max`.
@@ -92,7 +97,7 @@ On FrontierCode 2.0, Fable 5.2 at `high` scored about level with Opus 5.5 at `ma
 - Lower the effort one level before you change the model.
   On SWE-bench Pro, Opus 5.5 at `medium` scored about 2.5 points lower than at `high` for about 70% of the cost.
 - When outcomes can be checked automatically, run everything at `low` and re-run only the failures at `high`.
-- Keep the context of the main model lean, because each turn sends it again.
+- Keep the context of the main model small, because each turn sends it again.
   Give the verbose reading to subagents on a smaller model.
 - Move well-scoped work down to Sonnet 5.5, and simple high-volume work down to Haiku 5.5.
 - When you need a faster reply and no loss of capability, Opus 5.5 and Fable 5.2 have fast mode on the Claude API, at a premium price.
@@ -108,7 +113,7 @@ The numbers are in `references/models.md`.
 - Keep code edits and judgment calls on the main model.
   A subagent that edits code inherits the model of the session, with `model: inherit`.
   Put it on a smaller model only for well-scoped work with a test that checks the result, never on Haiku 5.5, and measure it first.
-- For work bigger than one context window, a top-tier model leads and many cheaper workers run in parallel.
+- For work bigger than one context window, Opus 5.5 or Fable 5.2 leads and many cheaper workers run in parallel.
   For one chain of dependent steps, or work that fits in one context window, use one agent, because the planning and merging cost more than they save.
 - When the routing rule is simple, such as one model for each type of step, let code pick the model and do not ask a model to pick.
 
@@ -142,7 +147,7 @@ For one task, use this shape:
 ```markdown
 **Model:** Sonnet 5.5 (`sonnet`, `claude-sonnet-5-5`)
 **Effort:** `medium`
-**Why:** A bug fix with a failing test is well-scoped work, and Sonnet 5.5 does it at half the Opus 5.5 token price.
+**Why:** The bug has a failing test, so the work is well-scoped and the result can be checked.
 **If it falls short:** Raise the effort to `high`, then move to Opus 5.5 at `medium`.
 **Set it with:** `/model sonnet`, then `/effort medium`
 ```
@@ -158,10 +163,10 @@ The task set of the user decides.
 
 1. Pull a sample of real tasks, and write an outcome check for each one, such as a passing test, a closed ticket or a correct row count.
 2. Run each candidate model at two or three effort levels, each in its own session, so that the runs do not share a cache.
-   Record the cost of each completed task from the `usage` field of each response.
+   Record the cost of each completed task, from the `usage` field of each API response or from `/usage` in Claude Code.
 3. Plot the score against the spend.
    Keep a setup with more than one model only if it beats every single-model point on that chart.
-4. Run the winner in shadow on a slice of real traffic before the cutover.
+4. Run the winner in shadow, next to the current setup, on a part of the real traffic before you switch.
 
 For a quick check in Claude Code, run one task from the backlog on two models with `/model`, and compare what `/usage` reports.
 
@@ -173,7 +178,7 @@ For a quick check in Claude Code, run one task from the backlog on two models wi
 - The built-in Explore subagent of Claude Code runs on the model of the session, and no longer always on Haiku.
   To keep exploration cheap, define a subagent with the name `Explore` and `model: haiku`.
 - The `opusplan` alias plans with Opus and makes the edits with Sonnet.
-  That is the reverse of the rule above, so measure it on your own tasks before you make it the default.
+  That is the reverse of the rule that code edits stay on the main model, so measure it on your own tasks before you make it the default.
 - The advisor tool is in beta, and in the platform cost guide no advisor pairing clearly beat its executor alone.
   Measure how often the executor asks for advice before you add an advisor.
 - You cannot always change only the model name.
