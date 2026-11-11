@@ -78,6 +78,8 @@ Each thinking block records the model that produced it, and a model reads the bl
 | Sonnet 5.5 | Haiku 5.5 |
 
 This table holds on the Claude API and on Claude Models on Google Cloud (Google managed).
+On the Claude API, Fable 5.1 also reads the blocks of Opus 5.5.
+Other moves can lose the reasoning too, so check the preserved thinking docs for a pair that is not in the table.
 
 - A model never reads the blocks of a model above it, so a move down a tier loses the earlier reasoning.
 - A move from Fable 5.2 to any other generally available model drops its reasoning.

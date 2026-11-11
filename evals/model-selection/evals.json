@@ -29,9 +29,9 @@
         "The response does not recommend max effort on Opus 5.5 as the next step",
         "The first recommendation is a way for the model to verify its own work on the failing metric, such as a benchmark or a script that measures p95 latency",
         "The response recommends a test of Fable 5.2 before Opus 5.5 goes past high effort",
-        "The Fable 5.2 test starts at an effort level below max, such as medium or high",
+        "The Fable 5.2 test starts at medium effort, or at an effort level below the high that Opus 5.5 ran at",
         "The response says that a higher effort level does not give a model knowledge or skill that it does not have",
-        "The response says that past high effort one more level can cost as much as a bigger model, or cites that Fable 5.2 at high matched Opus 5.5 at max for about half the cost per task",
+        "The response says that past high effort one more level can cost as much as a bigger model, or cites that Fable 5.2 at high scored about level with Opus 5.5 at max for about half the cost per task",
         "The response gives the order: self-verification, then effort, then the next model up"
       ]
     },
@@ -39,7 +39,7 @@
       "id": 3,
       "name": "subagent-definitions",
       "prompt": "Set up Claude Code subagents for this repo. I want one that reads the CI logs and reports the failing tests, one that explores the codebase to find where something is implemented, and one that fixes the failing tests. We are on the Anthropic API. Keep it cheap, but do not trade away correctness.",
-      "expected_output": "Files in .claude/agents/. The log reader has model: haiku and read-only tools. The exploration subagent has the name Explore and model: haiku, so that it replaces the built-in one that runs on the session model. The work that edits code is not on Haiku: it stays on the main session, or its subagent inherits the session model. The response explains the rule: a small model for work where a mistake is cheap to spot, the main model for edits and judgment calls.",
+      "expected_output": "Files in .claude/agents/. The log reader has model: haiku and no tool that edits files. The exploration subagent has the name Explore and model: haiku, so that it replaces the built-in one that runs on the session model. The work that edits code is not on Haiku: it stays on the main session, or its subagent inherits the session model. The response explains the rule: a small model for work where a mistake is cheap to spot, the main model for edits and judgment calls.",
       "files": [],
       "expectations": [
         "A subagent definition for log reading exists in .claude/agents/ with model: haiku",

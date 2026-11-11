@@ -26,7 +26,9 @@ When the user names a model that is not in this skill, or a decision depends on 
 
 The effort levels are `low`, `medium`, `high`, `xhigh` and `max`.
 Each model has a 1M-token context window and 128K tokens of output.
-Mythos 5.2 is available only through verification programs, so do not recommend it unless the user says they have access.
+Haiku 5.5 is the fastest, Sonnet 5.5 is fast, and Opus 5.5 and Fable 5.2 have moderate latency.
+Mythos 5.2 is the model for cybersecurity and life sciences research.
+It is available through verification programs, so do not recommend it unless the user says they have access.
 
 ## Start here
 
@@ -37,19 +39,19 @@ Then move down, or up, only for a reason from the table below.
 
 ## Pick by task
 
-| Task | Starting model | Starting effort |
-| --- | --- | --- |
-| Everyday engineering and debugging, feature work over several pull requests | Opus 5.5 | `medium`, then `high` |
-| Classification, routing, tagging, extraction at high volume | Haiku 5.5 | `medium` |
-| Subagents that search files, read logs or summarize | Haiku 5.5 or Sonnet 5.5 | The default of the model |
-| Chat and interactive sessions | Sonnet 5.5, or Haiku 5.5 for simple chat at volume | `low` or `medium` |
-| Well-scoped coding: a bug fix, a feature iteration, work against a spec | Sonnet 5.5 | `medium`, then `high` for harder tasks |
-| Everyday documents, slides and spreadsheets | Sonnet 5.5 | `high` on the API, `medium` in Claude Code |
-| Agent tasks that run again and again: investigation, review, drafting | Sonnet 5.5 | `medium` |
-| Computer use and vision-heavy workflows | Opus 5.5 | `medium` |
-| Major refactors and migrations, architecture planning, leading many subagents | Fable 5.2 | `medium`, then `high` |
-| Deep research, scientific or quantitative analysis | Fable 5.2 | `medium`, then `high` |
-| You are not sure yet | Opus 5.5 | `medium` |
+| Task | Starting model | Starting effort | Why |
+| --- | --- | --- | --- |
+| Everyday engineering and debugging, feature work over several pull requests | Opus 5.5 | `medium`, then `high` | The balance of cost and capability for everyday tasks |
+| Classification, routing, tagging, extraction at high volume | Haiku 5.5 | `medium` | The lowest cost and latency in the family |
+| Subagents that search files, read logs or summarize | Haiku 5.5 or Sonnet 5.5 | The default of the model | A wrong answer is cheap to spot, and the main model has the judgment calls |
+| Chat and interactive sessions | Sonnet 5.5, or Haiku 5.5 for simple chat at volume | `low` or `medium` | Sonnet 5.5 is fast, most of all at `low` or `medium` |
+| Well-scoped coding: a bug fix, a feature iteration, work against a spec | Sonnet 5.5 | `medium`, then `high` for harder tasks | It does scoped tasks well at half the Opus 5.5 token price |
+| Everyday documents, slides and spreadsheets | Sonnet 5.5 | `high` on the API, `medium` in Claude Code | It iterates fast and has a strong eye for design |
+| Agent tasks that run again and again: investigation, review, drafting | Sonnet 5.5 | `medium` | A well-defined, repeated task rarely needs a bigger model |
+| Computer use and vision-heavy workflows | Opus 5.5 | `medium` | These runs are long agentic loops over many screenshots and images |
+| Major refactors and migrations, architecture planning, leading many subagents | Fable 5.2 | `medium`, then `high` | The most capable generally available model for technical fields |
+| Deep research, scientific or quantitative analysis | Fable 5.2 | `medium`, then `high` | Built for the hardest technical projects in coding, finance and the sciences |
+| You are not sure yet | Opus 5.5 | `medium` | The default in Claude Code, and the starting point in the platform docs |
 
 On the API, Sonnet 5.5 and Fable 5.2 default to `high`, so set the effort in the request when the table says `medium`.
 
@@ -59,6 +61,7 @@ Check these points before you answer, because they move a task to a different ro
   A migration or a performance optimization can have a clear spec and still need Opus 5.5, or Fable 5.2 when it is a major one.
 - A complex financial model, or a document built from a large pile of source material, starts on Opus 5.5 and not on Sonnet 5.5.
 - A long run that nobody watches goes to Fable 5.2.
+- The hardest technical projects in coding, finance and the sciences go to Fable 5.2.
 - When a person waits for each reply, latency counts.
   Start on Sonnet 5.5 at `low` or `medium`.
 - A small model does well on high-volume work with outputs that can be checked.
@@ -69,7 +72,6 @@ Check these points before you answer, because they move a task to a different ro
 ## When the result is not good enough
 
 Take these steps in order, and stop at the first one that fixes the result.
-Each step costs more than the one before it.
 
 1. Check that the model can verify its own work, with a test, a build, or a script that calls the endpoint.
    This often costs less and adds less latency than a higher effort level.
@@ -83,7 +85,7 @@ For that, move up a model.
 
 Past `high`, one more effort level can cost as much as a bigger model.
 So when Opus 5.5 at `high` still falls short, test Fable 5.2 at a lower effort before you go to `xhigh` or `max`.
-On FrontierCode 2.0, Fable 5.2 at `high` scored level with Opus 5.5 at `max` for about half the cost per task.
+On FrontierCode 2.0, Fable 5.2 at `high` scored about level with Opus 5.5 at `max` for about half the cost per task.
 
 ## When it is too slow or costs too much
 
@@ -128,7 +130,7 @@ Read `references/mixing-models.md` before you write a subagent definition, switc
 | Default for subagents with no model | `CLAUDE_CODE_SUBAGENT_MODEL` | - |
 | Messages API | `model` | `output_config.effort` |
 
-You cannot change the model of the session that you run in.
+In Claude Code, you cannot change the model of the session that you run in.
 Give the user the command, and say when to run it.
 `/effort status` shows the effort level of the current session, because the default in Claude Code can differ from the default on the API.
 
@@ -168,14 +170,14 @@ For a quick check in Claude Code, run one task from the backlog on two models wi
 - The `haiku` alias resolves to Haiku 5.5 only on the Anthropic API, with Claude Code v2.1.293 or later.
   On Amazon Bedrock, Google Cloud, Microsoft Foundry and Claude Platform on AWS it still resolves to Haiku 4.5.
   `ANTHROPIC_DEFAULT_HAIKU_MODEL` pins the model that the alias uses.
-- The built-in Explore subagent of Claude Code runs on the model of the session, not on Haiku.
+- The built-in Explore subagent of Claude Code runs on the model of the session, and no longer always on Haiku.
   To keep exploration cheap, define a subagent with the name `Explore` and `model: haiku`.
 - The `opusplan` alias plans with Opus and makes the edits with Sonnet.
   That is the reverse of the rule above, so measure it on your own tasks before you make it the default.
 - The advisor tool is in beta, and in the platform cost guide no advisor pairing clearly beat its executor alone.
   Measure how often the executor asks for advice before you add an advisor.
 - You cannot always change only the model name.
-  Forced tool use, thinking that is turned off, and sampling parameters return a 400 error on some models.
+  Forced tool use, thinking that is turned off, and sampling parameters return an error on some models.
   Read `references/compatibility.md` before you move a request to a different model.
 - Do not quote a price or a benchmark number from memory.
   Take it from this skill or from the docs, and name the source.

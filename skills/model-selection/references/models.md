@@ -14,7 +14,7 @@ Check [Pricing](https://platform.claude.com/docs/en/about-claude/pricing) when a
 | Cache reads, per million tokens | $0.01 up to 100K, $0.05 over 100K | $0.10 | $0.20 | $0.20 |
 | Context window | 1M tokens | 1M tokens | 1M tokens | 1M tokens |
 | Max output | 128K tokens | 128K tokens | 128K tokens | 128K tokens |
-| Thinking on the API | Adaptive, on by default, can be turned off | Adaptive, on by default, `between_tools` skips the thinking before the first tool call | Adaptive, always on | Adaptive, always on |
+| Thinking on the API | Adaptive, on by default, can be turned off | Adaptive, on by default, `between_tools` skips upfront thinking | Adaptive, always on | Adaptive, always on |
 | Default effort on the API | `medium` | `high` | `medium` | `high` |
 | Default effort in Claude Code | `medium` | `medium` | `medium` | `medium` |
 | Fast mode | No | No | Yes | Yes |
