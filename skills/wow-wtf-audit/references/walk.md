@@ -19,6 +19,7 @@ The stage decides the position weight of a moment in `references/scoring.md`.
 
 An error or an edge case has the position of the stage where the user hits it.
 A signup error is before first value.
+A moment that the user hits in more than one stage has the position of the earliest of them.
 
 ## Lenses
 

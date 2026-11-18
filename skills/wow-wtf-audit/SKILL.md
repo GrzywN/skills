@@ -60,7 +60,7 @@ Each moment has one record.
 - **What happened:** <what the product did>
 - **Expected:** <what a reasonable user expected, and where that expectation comes from>
 - **Evidence:** <numbered reproduction steps, and the path of the screenshot>
-- **Reproduced:** <twice, the second time in a clean session | once, for a WOW only>
+- **Reproduced:** <twice, the second time in a clean session>
 - **Type:** WTF | WOW | missed WOW
 - **Score:** <severity> x <reach> x <position> = <score>
 - **Flags:** <blocks a group | hidden | late | fragile | none>
@@ -72,9 +72,10 @@ Write Where, What happened, Expected, Evidence and Type when you see the moment.
 After forty screens you do not remember the first ones.
 Reproduced and Root cause come in step 6, and Score, Flags and Proposed change in step 7.
 
+Reproduced is a field of a WTF only.
 A WTF that you saw only once goes to the unverified list.
 A WOW to protect has "What can break it" in place of Root cause and Proposed change.
-A WOW opportunity has "What happens now", and "Depends on" in place of Root cause.
+A WOW opportunity has "What happens now" in place of What happened, and "Depends on" in place of Root cause.
 
 The expectation needs a source: the copy of the product, an earlier screen, a platform convention, or the core job.
 A moment with no source is your opinion, and does not go in the report.
@@ -151,15 +152,8 @@ Write down the stages of the journey for this product, in order:
 
 State what first value is for this product.
 
-A lens is done when each stage in the scope is walked, or is in the coverage section as not reached with the reason.
+A lens is done when each stage in the scope has a value in the coverage table, and each stage that is not reached has its reason.
 When a WTF blocks the path, record it, go around it with the test account or a workaround, and continue.
-
-When you can start subagents and each one can have its own account, give each lens to one subagent.
-Give it the inputs of step 1, the rules, the record format, its lens from `references/walk.md` and the evidence folder.
-It returns records with no score.
-When two lenses return the same moment, keep one record and name both lenses.
-A subagent that did not see the code is also a real first-time user.
-With one shared account, walk the lenses one after the other, because parallel walks change the data of each other.
 
 Read `references/walk.md` now, before the first walk.
 
@@ -168,6 +162,7 @@ Read `references/walk.md` now, before the first walk.
 Do this lens before you read the source code.
 You can be a first-time user only once, because after you read the code you know where each control is.
 Before it, read from the repository only what you need to start the product and to find the target user and the core job.
+When you read the source code already and you can start subagents, give this walk to a subagent that did not read it, and wait for the result.
 
 Start with a fresh browser profile, and with a fresh account when the rules allow one.
 With no fresh account, walk the signup to the last step before the submit, continue in the test account, and write "partly" in the coverage.
@@ -193,6 +188,12 @@ Record only what the lens changes.
 - A person on a phone with a slow connection.
 - A person who uses only a keyboard and a screen reader.
 
+When you can start subagents and each one can have its own account, give each of these lenses to one subagent.
+Give it the inputs of step 1, the definitions, the rules, the gotchas, the record format, the key screens, the controls that the first walk clicked, its lens from `references/walk.md`, and the evidence folder.
+It returns records with no score.
+When two lenses return the same moment, keep one record and name both lenses.
+With one shared account, walk the lenses one after the other, because parallel walks change the data of each other.
+
 ### 5. Do the wrong thing, and visit each state
 
 Most WTF moments are not on the path where each step goes right.
@@ -201,9 +202,13 @@ On each key screen, do these on purpose: empty input, huge input, the back butto
 
 On each key screen, visit these four states: empty, loading, error, partial.
 
-Do this once, after the first-time walk.
+Do this once and yourself, after the first-time walk.
 On the phone, repeat only what changes with the layout or the connection.
 Skip an action that a screen has no control for.
+
+Record a moment of this step with the first-time lens.
+In the coverage table, the result of this step goes in the first-time column of the row "Errors and edge cases".
+Each other column of that row gets "partly" when that lens saw an error or an edge case, and "does not apply" when it did not.
 
 `references/walk.md` says how to cause each one and what a good product does.
 
@@ -223,6 +228,7 @@ With no code, give the root cause as a hypothesis and say that it is not confirm
 
 Score = severity (1 to 5) x reach (the share of all the users of the product who hit the moment, 0 to 1) x position (3 up to first value, 2 in the core loop, 1 in the other stages).
 An error or an edge case has the position of the stage where the user hits it.
+A moment that the user hits in more than one stage has the position of the earliest of them.
 A user who leaves at the signup never sees the settings, so an early moment weighs more.
 
 Rank with these rules:
@@ -264,7 +270,7 @@ Write it to a file only when the user asks, at the path that the user gives.
   Read the accessibility tree and say in the report that it is a proxy.
 - A payment, a plan cancellation, an account deletion and a message to a real person cannot be undone.
   Walk each to the last step before the action, record what you see, and stop.
-  Do the last step of a cancellation or an account deletion only when the user said that the test account is disposable.
+  Do the last step of a cancellation or an account deletion only in an account that you made on a build that you started, or when the user said that the test account is disposable.
   Do not complete a payment, unless the user gave a test payment method for it.
   Send a message only to a test address.
 - A delete of a record that you made during the walk is part of the walk.

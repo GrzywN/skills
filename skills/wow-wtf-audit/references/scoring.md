@@ -50,6 +50,7 @@ With no data, estimate with these bands and say that the number is an estimate.
 | 1 | The other stages: settings and billing, coming back after a break, leaving or cancelling |
 
 An error or an edge case has the position of the stage where the user hits it.
+A moment that the user hits in more than one stage has the position of the earliest of them.
 
 ## Ranking rules
 
@@ -71,7 +72,8 @@ It names each of them, and it has the highest score of the moments that it close
   Order the WTF fixes by score, then the WOW actions by score.
 - A WOW action on the same path as an open WTF names that WTF in "Depends on".
   A WOW followed by a WTF is remembered as a WTF.
-- Decoration is not an action, unless the moment below it works already.
+- Decoration is not an action and not a WOW opportunity, unless the moment below it works already.
+  Name it in one line, and say why it does not count.
 - With fewer than five actions, give fewer.
 - List each "blocks a group" moment that is not in the top 5 in one line below the table.
 
