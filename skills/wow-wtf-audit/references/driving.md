@@ -6,7 +6,7 @@ Read this file before the first walk.
 
 | Product | Drive it with | First value is usually |
 | --- | --- | --- |
-| Web app | The browser tool that you have. With none, a Playwright script. | The first result made from the own input of the user |
+| Web app | The browser tool that you have. With none, a Playwright script. | The first result made from the user's own input |
 | Mobile app | An emulator or a simulator, if you have one | The same |
 | CLI | A clean shell, with no config from an earlier run | The first command that does the job with success |
 | API or SDK | The quickstart of the docs, typed out as a new developer does | The first call that returns the data of the user |
@@ -26,6 +26,13 @@ The stages fit each type of product.
 | Coming back | A new session | An upgrade to a new version | A version change, a key that expired |
 | Leaving | Cancel, delete, export | Uninstall, what is left on the disk | Delete the key, export the data |
 
+Two lenses change for a CLI or an API.
+
+- The phone lens is a terminal of 80 columns, a slow network, and output that goes to a pipe or a CI log.
+- The screen reader lens is plain output: `NO_COLOR=1`, no spinner, and no meaning that only a colour or a symbol carries.
+
+A lens that has no meaning for the product is "not applicable" in the Coverage table.
+
 For a CLI or an API, the evidence is the exact command or request, the full output, and the exit code or the status.
 
 ## Start a product from its repository
@@ -35,7 +42,6 @@ For a CLI or an API, the evidence is the exact command or request, the full outp
 - Note the commit and the port.
 - Do not read the source on the way.
   The first-time walk comes first.
-- Stop the process when the audit ends.
 
 ## What your browser tool must do
 
@@ -46,24 +52,24 @@ For a CLI or an API, the evidence is the exact command or request, the full outp
 - Send key presses, and report which element has the focus.
 - Read the accessibility tree.
 - Delay or fail one request.
+- Run a script that measures time.
 
 If your tool lacks one of these, use a Playwright script for that part.
+Keep the script in the output directory, and install nothing into the product.
 If you cannot do a part at all, list it under "could not reach".
 
 ## Playwright
 
-These calls are the ones that are not obvious.
-They need Chromium, because the throttle uses the Chrome DevTools Protocol.
+These are the calls that are not obvious.
+The throttle needs Chromium, because it uses the Chrome DevTools Protocol.
 
 ```javascript
 import { chromium, devices } from 'playwright';
 
 const browser = await chromium.launch();
-
-const cleanSession = await browser.newContext();
-
 const phone = await browser.newContext({ ...devices['iPhone 13'] });
 const page = await phone.newPage();
+
 const devtools = await phone.newCDPSession(page);
 await devtools.send('Network.enable');
 await devtools.send('Network.emulateNetworkConditions', {
@@ -84,31 +90,27 @@ await page.route('**/api/invoices', async (route) => {
   await route.continue();
 });
 
-await page.keyboard.press('Tab');
 const focused = await page.evaluate(() => document.activeElement?.outerHTML.slice(0, 200));
-
 const accessibilityTree = await page.locator('body').ariaSnapshot();
-
 const sidewaysScroll = await page.evaluate(
   () => document.documentElement.scrollWidth > window.innerWidth,
 );
-
-await page.screenshot({ path: 'evidence/WTF-01-name.png' });
 ```
 
+- A new context is a clean session.
 - The throughput values are in bytes per second.
   The values above are about 1.6 Mbit/s down, 750 kbit/s up and 150 ms of latency, with a CPU that is 4 times slower.
   That is the slow 4G profile that Lighthouse uses for a mid-range phone.
 - The three `page.route` calls are alternatives.
   When more than one handler matches a URL, the one that you added last runs, so remove a handler with `page.unroute` before you add the next one.
-- `phone.clearCookies()` in the middle of a flow is the expired session.
-- A real double click is `page.locator(...).dblclick()`.
+- `clearCookies()` in the middle of a flow is the expired session.
+- A double click is `locator.dblclick()`.
 - To walk with the keyboard, press Tab until the focus returns to the first control, and log the focused element after each press.
   A control that is not in the log cannot be reached.
 
 ## Evidence
 
-- Name each file after the record: `evidence/WTF-03-signup-cleared.png`.
+- Name each file after the ID of the record: `evidence/WTF-03-signup-cleared.png`.
 - Take the screenshot at the moment of the broken expectation, with the URL or the screen name in the record.
   For a wait, take one screenshot in the middle of the wait.
   For lost work, take one before and one after.
@@ -116,34 +118,41 @@ await page.screenshot({ path: 'evidence/WTF-01-name.png' });
 - Do not put a password, a token or personal data of a real person in a screenshot or in the steps.
   The test account that the user gave you is the exception.
 
+## Waits
+
+You cannot time a wait across two tool calls, because the round trip of a tool call is longer than the wait.
+Time it inside one script.
+
+```javascript
+const started = Date.now();
+await page.getByRole('button', { name: 'Submit' }).click();
+await page.waitForTimeout(1000);
+await page.screenshot({ path: 'evidence/WTF-05-one-second-after-submit.png' });
+await page.getByRole('table').waitFor();
+const secondsToResult = (Date.now() - started) / 1000;
+```
+
+- The screenshot after 1 second shows if the user has feedback by then: a spinner, a disabled button, a message.
+- `secondsToResult` is the length of the wait.
+- For a page load, read `performance.getEntriesByType('navigation')[0]` in the page.
+
+A wait over 1 second with no feedback is a WTF.
+After 10 seconds a user turns to other work, and needs progress and a way to come back.
+A blank screen is worse than the old content.
+The severity of a wait is in the score section of `SKILL.md`.
+
 ## Time to first value
 
 Count on the first-time walk, from the first screen to first value:
 
-- **Clicks:** each click or tap.
+- **Clicks:** each click or tap that is not a click into a field.
 - **Fields:** each field that the user must fill.
-- **Seconds:** see below.
 
-Your own thinking time is not the time of the product.
-So write the path down on the first walk, replay it as a script from a clean session, and report two numbers:
+Then replay the path as a script from a clean session, and report two numbers of seconds:
 
 - The seconds that the product made the user wait: page loads and responses, added up.
-- An estimate for a person: the waits, plus 2.5 seconds for each click, and 3 seconds plus 0.3 seconds for each typed character for each field.
+- An estimate for a person: the waits, plus about 2.5 seconds for each click, and about 3 seconds plus 0.3 seconds for each typed character for each field.
   These values are from the Keystroke-Level Model: 1.35 seconds to think, 1.1 to point, 0.2 to click, 0.4 to move the hand to the keyboard, 0.28 for each key.
   Say in the report that it is an estimate.
 
-Report the path with the numbers, for example "9 clicks, 10 fields, 6 seconds of waiting, about 75 seconds for a person: landing, signup, list, new invoice, submit".
-
-## Waits
-
-Time each wait: from the action to the first feedback, and from the action to the result.
-
-| Wait | The user |
-| --- | --- |
-| Under 0.1 second | Feels that the product reacts at once |
-| Under 1 second | Stays in the flow |
-| Over 1 second | Needs feedback that the product works |
-| Over 10 seconds | Turns to other work, and needs progress and a way to come back |
-
-A wait over 1 second with no feedback is a WTF.
-Its severity grows with the length of the wait and with what the user sees: a blank screen is worse than the old content.
+Report the path with the numbers, for example "9 clicks, 10 fields, 6 seconds of waiting, about 85 seconds for a person: landing, signup, list, new invoice, submit".
