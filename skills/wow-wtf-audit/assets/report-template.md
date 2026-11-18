@@ -8,7 +8,7 @@
 | Access | [URL, build, repository, test account] |
 | Compared with | [competitors, and "picked by the auditor" if the user named none] |
 | Date | [YYYY-MM-DD] |
-| Time to first value | [N clicks, N fields, N seconds of waiting, on the path: step, step, step] |
+| Time to first value | [N clicks, N fields, N seconds of waiting, about N seconds for a person (estimate), on the path: step, step, step] |
 | Moments | [N WTF, N WOW, N missed WOW, N unverified] |
 
 ## 1. Verdict
@@ -21,27 +21,29 @@
 
 | # | Action | Fixes or adds | Score | Why it is here |
 | --- | --- | --- | --- | --- |
-| 1 | [a change, concrete enough to implement] | [WTF-01] | [12.0] | [one line] |
+| 1 | [a change, concrete enough to implement] | [WTF-03, WTF-07] | [5.4] | [one line] |
 | 2 | | | | |
 | 3 | | | | |
 | 4 | | | | |
 | 5 | | | | |
 
-A WTF score counts double against a WOW score in this table.
+The score is the score of the record.
+An action for more than one record has the highest score among them.
 
 ## 3. WTF list
 
 Ranked by score, the highest first.
+The IDs are in the order of discovery, so they are not in order here.
 
-### WTF-01: [the broken expectation, in one line]
+### WTF-03: [the broken expectation, in one line]
 
 - **Where:** [stage, screen, URL or file]
 - **Expected:** [what a reasonable target user expected, and the source: promise, convention or job]
 - **Happened:** [what the product did]
-- **Evidence:** [`evidence/WTF-01-name.png`, and the exact steps]
+- **Evidence:** [`evidence/WTF-03-name.png`, and the exact steps]
 - **Reproduced:** [2 of 2, from a clean session]
 - **Type:** WTF
-- **Score:** [12.0 = severity 4 x reach 1.0 x position 3]
+- **Score:** [5.4 = severity 3 x reach 0.6 x position 3]
 - **Root cause:** [the cause, and "confirmed in `path:line`" or "probable"]
 - **Proposed change:** [the screen, and what changes on it]
 
@@ -57,9 +59,10 @@ Each record has the same fields as a WTF record, with these changes:
 
 ## 5. WOW opportunities
 
-Ranked by score, the highest first.
-Each record has the same fields as a WTF record, with **Type:** missed WOW, or WOW opportunity when no neutral moment exists yet.
-Each one says how it makes the core job faster, safer or better.
+The missed WOW records, ranked by score, the highest first.
+Each record has the same fields as a WTF record, with **Type:** missed WOW.
+The score uses the severity that the moment reaches after the proposed change.
+Each one says if it makes the core job faster, safer or better.
 
 ### MISS-01: [the moment that can beat the expectation, in one line]
 
@@ -78,10 +81,13 @@ Each one says how it makes the core job faster, safer or better.
 | Coming back after a break | | | | | |
 | Leaving or cancelling | | | | | |
 
-Each cell is one of: walked, partly (with the reason), not reached.
+Each cell is one of: walked, partly (with the reason), not reached, not applicable.
+The "Errors and edge cases" row has what step 4 of the workflow covered.
 
 States visited on the key screens: [screen: empty, loading, error, partial].
 Wrong things done: [flow: empty input, huge input, back, refresh, double click, expired session, offline].
+
+Created by the audit: [each account and each record that you created, and each file outside the output directory].
 
 ### Could not reach
 
@@ -89,7 +95,7 @@ Wrong things done: [flow: empty input, huge input, back, refresh, double click, 
 
 ### Unverified
 
-- [what you saw once or concluded from the code, the steps that you tried, and what you need to verify it]
+- [what you saw once, concluded from the code, or know from a complaint, the steps that you tried, and what you need to verify it]
 
 ### Limits of this audit
 

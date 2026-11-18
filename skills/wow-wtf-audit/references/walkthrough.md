@@ -6,7 +6,8 @@ Record only what you observed.
 
 ## Stages
 
-Walk the stages in this order, because the order is the weight: a user who leaves at stage 2 does not see stage 5.
+Walk the stages in this order.
+An earlier stage has more weight, as the position table in `SKILL.md` says.
 
 | Stage | The question of the user | A WTF is often here | A WOW is often here |
 | --- | --- | --- | --- |
@@ -30,7 +31,9 @@ For stage 8, find the path and count its steps, and stop before the last confirm
 ### First-time user with no context
 
 - Start from a clean session: no cookies, no stored login, no knowledge from the code or the docs.
-- Read the first screen for 5 seconds, then write down what the product is, who it is for, and what to do next.
+- Do the first-screen test.
+  Take one screenshot of the first screen with no scroll.
+  From that screenshot alone, write down what the product is, who it is for, and what to do next.
   If you cannot, that is the first record.
 - Open the docs only when the product sends you there, and record that it did.
 
@@ -52,7 +55,7 @@ This person decides in a few minutes whether the product is worth their time, an
   A claim that the product does not keep is a WTF, with the promise as the source of the expectation.
 - Look for the answers that a buyer needs before they commit: the price and the limits, what happens to the data, how to leave, who is behind the product, where the docs and the support are.
 - Compare with each competitor on the same job, from public pages only: the steps to first value that the competitor shows, the price, and the main claim.
-  Record where the product is behind as a WTF or a WOW opportunity, and where it is ahead as a WOW to protect.
+  Record where the product is behind as a WTF or a missed WOW, and where it is ahead as a WOW to protect.
 
 ### A phone with a slow connection
 
@@ -61,7 +64,8 @@ This person decides in a few minutes whether the product is worth their time, an
 - Look for sideways scroll, a control outside the screen, content under a fixed bar, and a tap target smaller than 24 by 24 CSS pixels.
 - Look at what the user sees while the page loads: a blank screen, a layout that jumps, or content that shows up in a useful order.
 - Check that a tap gives feedback at once, also when the response is slow.
-- Check that each input opens the right keyboard: email, number, phone.
+- Check that each input opens the right keyboard.
+  An emulated phone has no keyboard on the screen, so read the `type`, `inputmode` and `autocomplete` of each input.
   A text size under 16 pixels in an input makes iOS Safari zoom in on focus.
 - Cut the connection in the middle of a flow.
 
@@ -94,7 +98,7 @@ To delay or fail a request in your own browser does not change the product, so t
 ## Wrong things
 
 Do each of these on each key flow.
-After each one, check for lost work first, because lost work is severity 5.
+After each one, check for lost work first, because lost work can be severity 5.
 
 | Wrong thing | How | A good product |
 | --- | --- | --- |
@@ -102,7 +106,7 @@ After each one, check for lost work first, because lost work is severity 5.
 | Huge input | A text of 10,000 characters, a long word with no spaces, a very large number, a negative number, emoji and non-Latin text | Accepts it, or states the limit before submit, and the layout holds |
 | Back button | Go back after each step of a flow, then forward | Returns to the step with the input in place, and does not submit twice |
 | Refresh | Reload with a form that is half filled, and in the middle of a flow with more than one step | Keeps a draft, or warns before the page unloads |
-| Double click | Double-click each button that creates, sends or pays | One result |
+| Double click | Double-click each button that creates or saves a record of your own. Do not double-click a button that pays, sends to a person, or cannot be undone. | One result |
 | Expired session | Delete the session cookie or token in your own browser in the middle of a flow, then go on | Says that the session ended, and returns to the same place with the input after login |
 | No connection | Go offline before a submit, and in the middle of a load | Says so, keeps the input, and tries again or lets the user try again |
 
