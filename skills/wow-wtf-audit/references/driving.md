@@ -42,9 +42,24 @@ For a CLI or an API, the evidence is the exact command or request, the full outp
 
 ## Start a product from its repository
 
+An instance that you start from the repository is your own when it has its own database and no live keys for email or payment.
+Check its configuration before you rely on that.
+If you cannot tell, the instance is not your own, and each read-only rule of `SKILL.md` holds as it is written.
+
+In your own instance you can do four things that the read-only rules do not allow in other places:
+
+- Sign up with an `@example.com` address.
+- Send a message of the core job to an `@example.com` address.
+- Save a setting of your own account.
+- Start the instance again to get fresh data.
+
+Start it in this way:
+
 - Follow the README or the `Makefile`.
   Each step that the README does not have, and each error on the way, is a WTF for a developer product.
-  The read-only rules of `SKILL.md` say which missing step you can take.
+- You can take a setup step that the README lacks when it changes no tracked file, such as an install of dependencies or a copy of an example config.
+  Record that step as a WTF, and list what it created under "Created by the audit".
+- Note the ID of each process that you start, and stop only those when the audit ends.
 - Note the commit and the port.
 - Do not read the source on the way.
   The first-time walk comes first.

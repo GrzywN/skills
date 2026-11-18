@@ -34,7 +34,7 @@ Each fix of a WTF is above each WOW action.
 
 ## 3. WTF list
 
-Ranked by score, the highest first.
+Ranked by score, the highest first, with the tie rule of the ranking rules.
 The IDs are in the order of discovery, so they are not in order here.
 
 ### WTF-03: [the broken expectation, in one line]
@@ -63,7 +63,7 @@ Each record has the same fields as a WTF record, with these changes:
 
 ## 5. WOW opportunities
 
-The missed WOW records, ranked by score, the highest first.
+The missed WOW records, ranked by score, the highest first, with decoration last.
 Each record has the same fields as a WTF record, with these changes:
 
 - **Type:** missed WOW
