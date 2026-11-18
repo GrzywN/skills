@@ -10,6 +10,7 @@ Each skill uses the [Agent Skills](https://agentskills.io) format and works in e
 | [testing-pyramid](skills/testing-pyramid/SKILL.md) | A testing approach for agent-native apps: strict runtime contracts, one `assert` function, and tests that state the specification, with E2E kept small. |
 | [no-comments](skills/no-comments/SKILL.md) | Removes comments from a codebase, moves their knowledge to names, assertions, test names and `docs/`, and adds a check that stops new ones. |
 | [model-selection](skills/model-selection/SKILL.md) | Picks the Claude model and the effort level for a task, for subagents and for API calls, and says what to try before a bigger model. |
+| [wow-wtf-audit](skills/wow-wtf-audit/SKILL.md) | Audits a product by using it for real, and returns a ranked list of changes that remove WTF moments and add WOW moments, each with evidence and a score. |
 | [nestjs-production-checklist](skills/nestjs-production-checklist/SKILL.md) | Runs all 17 NestJS production checks below in phases, applies the fixes, and reports what passed, what changed, and what is left. |
 | [nestjs-config-validation](skills/nestjs-config-validation/SKILL.md) | Validates config at boot, reads required values with `getOrThrow`, and keeps secrets out of the image and the logs. |
 | [nestjs-graceful-shutdown](skills/nestjs-graceful-shutdown/SKILL.md) | Makes SIGTERM reach Node and run the shutdown hooks, with a multi-stage non-root image and a heap limit that fits the container. |
@@ -35,6 +36,7 @@ Each skill uses the [Agent Skills](https://agentskills.io) format and works in e
 npx skills add GrzywN/skills@testing-pyramid
 npx skills add GrzywN/skills@no-comments
 npx skills add GrzywN/skills@model-selection
+npx skills add GrzywN/skills@wow-wtf-audit
 ```
 
 The `model-selection` skill is based on [Which Claude model should you build with?](https://claude.dev/blog/which-claude-model-should-you-build-with/) by Addy Osmani.
