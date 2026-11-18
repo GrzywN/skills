@@ -87,6 +87,7 @@ The product, its code, its settings and the data of other people are the same af
   Walk a purchase, an upgrade, a cancellation and an account deletion up to the last step before the one that cannot be undone, and stop there.
   An upgrade stops at the pay button, also with a test card, because it changes the plan of the account.
   When you cannot tell if a step can be undone, treat it as one that cannot.
+  If the code shows in step 6 that the step changes nothing, go back and take it.
 - **Other people.**
   Do not send a message, an invitation or an email to a real person.
   When the core job sends one, send it only to the test recipient that the user gave you.
@@ -287,6 +288,7 @@ Score = severity x reach x position.
   Less than that is severity 3.
 - For a wait with no feedback, this rule sets the severity, and not the table: 1 up to 3 seconds, 2 up to 10 seconds, 3 over 10 seconds.
   Time the wait with no throttle, except in the phone lens.
+  Two waits with no feedback between them are one wait.
 - For a missed WOW, use the row that the moment reaches after the proposed change.
 
 **Reach**, the share of the target users at that stage who meet the moment.
@@ -327,7 +329,7 @@ Score = severity x reach x position.
 Make the list of actions with these rules, in this order.
 
 1. **One action for one change.**
-   When one change fixes more than one record, write one action that lists each ID.
+   When the same **Proposed change** fixes more than one record, write one action that lists each ID.
    An action that fixes a WTF is the fix of a WTF, and its score and its severity are the highest among its WTF records.
    An action with no WTF record is a WOW action, with the highest score and severity among its records.
    An action takes the earliest stage among its records.

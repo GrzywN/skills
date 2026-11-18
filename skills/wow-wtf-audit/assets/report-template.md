@@ -32,6 +32,12 @@ The fix of more than one WTF has the highest score among its WTF records.
 An action that surfaces a WOW has the score of the WOW at its new position and reach.
 Each fix of a WTF is above each WOW action.
 
+### The other actions, in order
+
+| # | Action | Fixes or adds | Score |
+| --- | --- | --- | --- |
+| 6 | | | |
+
 ## 3. WTF list
 
 Ranked by score, the highest first, with the tie rule of the ranking rules.
@@ -90,7 +96,7 @@ Each record has the same fields as a WTF record, with these changes:
 | Leaving or cancelling | | | | | |
 
 Each cell is one of: walked, partly (with the reason), not reached, not applicable, out of scope.
-In the "Errors and edge cases" row, write what step 4 of the workflow covered in the column of the setup that it ran in, and "not applicable" in the other columns.
+In the "Errors and edge cases" row, write what step 4 of the workflow covered in the column of each setup that it ran in, and "not applicable" in the other columns.
 
 States visited on the key screens: [screen: empty, loading, error, partial].
 Wrong things done: [flow: empty input, huge input, back, refresh, double click, expired session, offline].
