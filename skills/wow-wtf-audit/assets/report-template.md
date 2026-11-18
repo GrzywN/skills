@@ -28,7 +28,7 @@
 | 5 | | | | |
 
 The score is the score of the record.
-An action for more than one record has the highest score among them.
+An action for more than one record has the highest score and the highest severity among them.
 
 ## 3. WTF list
 
@@ -53,6 +53,8 @@ Each record has the same fields as a WTF record, with these changes:
 
 - **Type:** WOW
 - **Flags:** [hidden, late, fragile, or none, each with its reason]
+- **Root cause:** [what makes the moment work]
+- No **Reproduced** field
 - **Proposed change:** [how to protect it, or how to bring it earlier]
 
 ### WOW-01: [the beaten expectation, in one line]
@@ -81,7 +83,7 @@ Each one says if it makes the core job faster, safer or better.
 | Coming back after a break | | | | | |
 | Leaving or cancelling | | | | | |
 
-Each cell is one of: walked, partly (with the reason), not reached, not applicable.
+Each cell is one of: walked, partly (with the reason), not reached, not applicable, out of scope.
 The "Errors and edge cases" row has what step 4 of the workflow covered.
 
 States visited on the key screens: [screen: empty, loading, error, partial].
