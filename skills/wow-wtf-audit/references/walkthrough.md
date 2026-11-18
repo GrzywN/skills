@@ -107,6 +107,8 @@ A request that you delay or fail in your own browser does not change the product
 
 Do each of these on each key flow.
 After each one, check for lost work first, because lost work can be severity 5.
+On the signup flow, do only the wrong things that create no account, unless the instance is your own.
+Do not create an account only to reach the empty state.
 
 | Wrong thing | How | A good product |
 | --- | --- | --- |

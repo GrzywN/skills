@@ -48,8 +48,8 @@ If you cannot name the source, drop the record.
 | Input | When it is missing |
 | --- | --- |
 | The product and the access to it: a URL, a build, a repository | Ask. You cannot audit without it. |
-| An account, when the product has a signup: the permission to sign up, with a mailbox from the user if the product checks the address, or a test account | Ask, unless the instance is your own, as the read-only rules define it. Prefer the permission to sign up, because a ready account skips the signup and the onboarding. |
-| A test card and a test recipient, when the core job pays or sends a message | Ask. With none, stop before the payment or the send. |
+| An account, when the product has a signup: the permission to sign up, with a mailbox from the user if the product checks the address, or a test account | Ask, unless the instance is your own, as `references/driving.md` defines it. Prefer the permission to sign up, because a ready account skips the signup and the onboarding. |
+| A test card and a test recipient, when the core job pays or sends a message | Ask. With none, stop before the payment or the send. In your own instance, an `@example.com` recipient needs no ask. |
 | The target user | Take it from the request or the README. If only the landing page has it, take it after the first-screen test of step 2. State it as an assumption at the top of the report. |
 | The core job of that user (the job to be done) | The same. |
 | The competitors, only when you walk the skeptical evaluator lens | Use the alternatives that the product names itself. If it names none, pick the two that a buyer would compare first, and say that you picked them. |
@@ -60,7 +60,7 @@ Infer the other three, and state them as assumptions.
 You can say that analytics and user complaints make the reach more exact, but do not wait for them.
 While you wait for the access, do not list likely findings, because nothing is observed yet.
 
-With only a ready account, read the signup form and stop before the submit, mark that stage as "partly", and count the time to first value from the login.
+With only a ready account on an instance that is not your own, read the signup form and stop before the submit, mark that stage as "partly", and count the time to first value from the login.
 
 ## The audit is read-only
 
@@ -68,7 +68,7 @@ The product, its code, its settings and the data of other people are the same af
 
 - **Code.**
   Do not change code, configuration or feature flags, and do not commit.
-  If the product needs a fix before it starts, that is a WTF of its setup: record it and do not fix it.
+  If the product needs a change of a tracked file before it starts, that is a WTF of its setup: record it and do not fix it.
   Do not fix what you find later either: the user decides on the fixes after the report.
 - **Settings.**
   Open each settings and billing screen and read it.
@@ -76,15 +76,16 @@ The product, its code, its settings and the data of other people are the same af
 - **Data.**
   Real use creates records.
   The only data that you add is your own records in the test account.
-  You can edit and delete only the records that you created.
+  You can edit and delete only the records that you created, and that is not a step that cannot be undone.
 - **Accounts.**
   Use only the access that the user gave you.
   Create an account only when the user allows it.
 - **Money.**
-  Do not pay, except with a test card that the user gave you, in a sandbox.
+  Do not pay.
+  The exception is a payment that is the core job, with a test card that the user gave you, in a sandbox.
 - **Steps that cannot be undone.**
   Walk a purchase, an upgrade, a cancellation and an account deletion up to the last step before the one that cannot be undone, and stop there.
-  A payment with that test card is not such a step.
+  An upgrade stops at the pay button, also with a test card, because it changes the plan of the account.
   When you cannot tell if a step can be undone, treat it as one that cannot.
 - **Other people.**
   Do not send a message, an invitation or an email to a real person.
@@ -92,15 +93,9 @@ The product, its code, its settings and the data of other people are the same af
   Look at competitors only through their public pages.
 
 **Your own instance.**
-An instance that you start from the repository is your own when it has its own database and no live keys for email or payment.
-Check its configuration before you rely on that.
-If you cannot tell, the instance is not your own.
-In your own instance you can sign up with an `@example.com` address, save a setting of your account, and start the instance again to get fresh data.
-
-- Start it in the way its README or `Makefile` says.
-- You can take a setup step that the README lacks when it changes no tracked file, such as an install of dependencies or a copy of an example config.
-  Record that step as a WTF.
-- Note the ID of each process that you start, and stop only those when the audit ends.
+An instance that you start from the repository, with its own data, has wider rules for accounts, settings and messages.
+They are in "Start a product from its repository" in `references/driving.md`.
+Read them before you start it.
 
 When a step needs more than these rules allow, do not take it.
 List the step under "could not reach" in the Coverage section.
@@ -205,7 +200,7 @@ Start from a clean session, and follow your own written steps.
 - A moment that an account meets only once, such as a tour or a first-run screen, needs a new account or a fresh instance.
   With none, it is unverified, and the record says that a second account verifies it.
 
-Do not drop a moment that you cannot reproduce, and do not promote it to the ranked list.
+Do not drop a moment that you cannot reproduce, and do not promote it to the WTF list.
 A thing that you concluded from the code, and that a user can meet, but that you did not observe in the product, is also unverified.
 A thing in the code that no user can meet does not go in the report.
 
@@ -234,15 +229,15 @@ Do not change the rank for it.
 
 Then check the report against this list, and fix what fails:
 
-- Each WTF in the ranked list was observed in the product and was reproduced a second time.
+- Each WTF in the WTF list was observed in the product and was reproduced a second time.
 - Each record has evidence: a screenshot file that exists, or steps that a person can follow with no other help.
 - Each record names the source of its expectation.
 - Each score shows its three factors.
-- Each proposed change names the screen and what changes on it.
+- Each proposed change names the screen and what changes on it, except "none" on a WOW with no flag.
   "Improve the onboarding" is not a change.
 - The top 5 follows the ranking rules.
 - The Coverage section has each stage and each lens, including the ones that you did not reach, and each record and account that you created.
-- No tracked file changed, the only new files are the output directory and what the documented setup creates, and each process that you started is stopped.
+- No tracked file changed, the only new files are the output directory and what the setup created, each listed under "Created by the audit", and each process that you started is stopped.
 
 ## The record
 
@@ -287,7 +282,7 @@ Score = severity x reach x position.
 | 5 | Lost work, lost money, lost data, a privacy surprise, or the core job cannot be done | The user would show it to another person |
 
 - When two rows fit, take the higher one.
-- "The core job cannot be done" means that the product leaves no path to it.
+- "The core job cannot be done" means no path for the user who meets the moment, now or later.
 - Lost work is severity 5 when it took the user more than one minute to make, by the time estimate of `references/driving.md`.
   Less than that is severity 3.
 - For a wait with no feedback, this rule sets the severity, and not the table: 1 up to 3 seconds, 2 up to 10 seconds, 3 over 10 seconds.
@@ -308,8 +303,9 @@ Score = severity x reach x position.
 - The lens that found a moment does not set its reach.
   Estimate the share of the target users who use the product in that way, for example on a phone.
   With no numbers, a moment that only a keyboard user meets is 0.1.
-- A state that you forced, such as an expired session or no connection, has the reach of the users who meet that state in real use.
+- A state of the session or the network that you forced, such as an expired session or no connection, has the reach of the users who meet that state in real use.
   With no numbers, that is 0.1.
+  For a wrong input or a wrong click, estimate from the table how many users do that.
 - With analytics from the user, use the real share.
   With none, say in the Coverage section that the reach is your estimate.
 
@@ -322,7 +318,7 @@ Score = severity x reach x position.
 | 1 | After it: settings and billing, coming back, leaving |
 
 - A login, a limit or a paywall that the user meets before first value is 3, and in the core loop it is 2.
-- An error or an edge case takes the position of the stage where it happens.
+- An error or an edge case belongs to the stage where it happens: for the position, for the **Where** field and for a tie.
 - A moment that happens in more than one stage takes the earliest one.
 - An early moment has more weight because a user who leaves does not see what comes later.
 
@@ -333,8 +329,9 @@ Make the list of actions with these rules, in this order.
 1. **One action for one change.**
    When one change fixes more than one record, write one action that lists each ID.
    An action that fixes a WTF is the fix of a WTF, and its score and its severity are the highest among its WTF records.
-   An action with no WTF record is a WOW action, with the highest score among its records.
-   When one action makes another one unnecessary, say so in the second one, and keep both in the list.
+   An action with no WTF record is a WOW action, with the highest score and severity among its records.
+   An action takes the earliest stage among its records.
+   When one action makes another one unnecessary, say so in the **Proposed change** of the second record, and keep both.
 2. **Rank by the impact on the user, not by the cost of the change.**
    Order the fixes of the WTF records by score.
    The cost is not a part of the score, and not a tie-break.
@@ -342,19 +339,24 @@ Make the list of actions with these rules, in this order.
    A broken expectation costs more trust than a delight earns, and a WOW that is followed by a WTF is remembered as a WTF.
    So each WOW action goes after the last fix of a WTF.
 4. **The core job before decoration.**
-   Among the WOW actions, one that makes the core job faster, safer or better goes before one that does not.
-   After that, the score decides.
-   Animation and confetti do not count as a WOW, unless the moment under them already works.
+   A WOW action is decoration when it changes only how a moment looks or feels, such as an animation, confetti or an illustration, and not what the user can do or how soon.
+   Decoration goes after each other WOW action, and among the others the score decides.
+   Do not propose decoration on a moment that has a WTF.
 5. **Ties.**
-   With the same score, the higher severity goes first, then the earlier stage, then the lower ID.
+   With the same score, the higher severity goes first, then the earlier stage, then the moment that you found first.
+   This rule also orders the records in sections 3 and 5 of the report.
 
 The top 5 is the first five actions of that list.
 
 **Surface the WOW that exists.**
 Flag each existing WOW that is hidden, late in the journey, or fragile.
-A WOW is fragile when a small change of the input breaks it, or when a WTF follows it in the journey.
+
+- Hidden: it is not on a key screen, or it is below the first view of one.
+- Late: it comes after first value, and it can come before.
+- Fragile: a small change of the input breaks it, or a WTF follows it in the journey.
+
 Write a WOW action for each flag: make the WOW visible, bring it earlier, or protect it.
-Score that action as the WOW at its new position and reach.
+The score of that action is the score of the WOW at its new position, with the reach of the place that it moves to.
 This is often the smallest change with the largest effect, so each flag gets its action in the report, also when the action is not in the top 5.
 
 ## The report
