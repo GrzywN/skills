@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign up - Billbird</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="signup">
+<header class="topbar">
+  <a class="brand" href="/">Billbird</a>
+  <div class="account">
+    <a href="/login.html">Log in</a>
+  </div>
+</header>
+<main class="narrow">
+  <h1>Create your account</h1>
+  <p id="form-message" class="message error" hidden></p>
+  <form id="signup-form" class="card stack" novalidate>
+    <label class="field">
+      <span>Name</span>
+      <input type="text" name="name" autocomplete="name">
+    </label>
+    <label class="field">
+      <span>Email</span>
+      <input type="email" name="email" autocomplete="email">
+    </label>
+    <label class="field">
+      <span>Password</span>
+      <input type="password" name="password" autocomplete="new-password">
+    </label>
+    <label class="field">
+      <span>Company</span>
+      <input type="text" name="company" autocomplete="organization">
+    </label>
+    <button type="submit" class="button primary">Sign up</button>
+  </form>
+  <p class="muted">Already have an account? <a href="/login.html">Log in</a></p>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

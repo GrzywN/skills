@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices - Billbird</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="invoices">
+<header class="topbar">
+  <a class="brand" href="/invoices.html">Billbird</a>
+  <nav class="nav">
+    <a href="/invoices.html">Invoices</a>
+    <a href="/invoice-new.html">Create</a>
+    <a href="/settings.html">Settings</a>
+  </nav>
+  <div class="account">
+    <span id="account-name" class="account-name"></span>
+    <button type="button" id="logout" class="link-button">Log out</button>
+  </div>
+</header>
+<main class="page">
+  <h1>Bills</h1>
+  <div class="card table-card">
+    <table class="table" id="invoice-table">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Client</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th class="numeric">Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="invoice-rows"></tbody>
+    </table>
+  </div>
+</main>
+<div id="toast-region" class="toast-region" aria-live="polite"></div>
+<script src="/app.js"></script>
+</body>
+</html>

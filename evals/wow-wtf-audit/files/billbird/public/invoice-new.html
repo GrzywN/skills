@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New invoice - Billbird</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="invoice-new">
+<header class="topbar">
+  <a class="brand" href="/invoices.html">Billbird</a>
+  <nav class="nav">
+    <a href="/invoices.html">Invoices</a>
+    <a href="/invoice-new.html">Create</a>
+    <a href="/settings.html">Settings</a>
+  </nav>
+  <div class="account">
+    <span id="account-name" class="account-name"></span>
+    <button type="button" id="logout" class="link-button">Log out</button>
+  </div>
+</header>
+<main class="page">
+  <h1>New invoice</h1>
+  <form id="invoice-form" class="card invoice-form" autocomplete="off">
+    <div id="repeat-slot" class="repeat-slot" hidden></div>
+    <div class="client-row">
+      <input type="text" name="clientName" placeholder="Client name" required>
+      <input type="email" name="clientEmail" placeholder="Client email (optional)">
+    </div>
+    <div id="line-items" class="line-items"></div>
+    <div id="add-line-item" class="add-line-item">Add line item</div>
+    <div class="total-row">
+      <span>Total</span>
+      <strong id="invoice-total">$0.00</strong>
+    </div>
+    <div class="form-actions">
+      <button type="submit" id="save-invoice" class="button primary">Add document</button>
+    </div>
+  </form>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

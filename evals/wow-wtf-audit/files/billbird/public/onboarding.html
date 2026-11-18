@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up your business - Billbird</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="onboarding">
+<header class="topbar">
+  <span class="brand">Billbird</span>
+  <div class="account">
+    <span id="account-name" class="account-name"></span>
+    <button type="button" id="logout" class="link-button">Log out</button>
+  </div>
+</header>
+<main class="narrow">
+  <h1>Set up your business</h1>
+  <p id="form-message" class="message error" hidden></p>
+  <form class="card stack onboarding-step" data-step="address">
+    <h2>Business address</h2>
+    <label class="field">
+      <span>Street</span>
+      <input type="text" name="street" autocomplete="street-address" required>
+    </label>
+    <label class="field">
+      <span>City</span>
+      <input type="text" name="city" autocomplete="address-level2" required>
+    </label>
+    <label class="field">
+      <span>Postal code</span>
+      <input type="text" name="postalCode" autocomplete="postal-code" required>
+    </label>
+    <label class="field">
+      <span>Country</span>
+      <input type="text" name="country" autocomplete="country-name" required>
+    </label>
+    <button type="submit" class="button primary">Continue</button>
+  </form>
+  <form class="card stack onboarding-step" data-step="tax" hidden>
+    <h2>Tax ID</h2>
+    <label class="field">
+      <span>Tax ID</span>
+      <input type="text" name="taxId" required>
+    </label>
+    <button type="submit" class="button primary">Continue</button>
+  </form>
+  <form class="card stack onboarding-step" data-step="terms" hidden>
+    <h2>Default payment terms</h2>
+    <label class="field">
+      <span>Payment terms</span>
+      <select name="paymentTerms" required>
+        <option value="">Choose payment terms</option>
+        <option value="0">Due on receipt</option>
+        <option value="7">Net 7</option>
+        <option value="14">Net 14</option>
+        <option value="30">Net 30</option>
+      </select>
+    </label>
+    <button type="submit" class="button primary">Continue</button>
+  </form>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>
