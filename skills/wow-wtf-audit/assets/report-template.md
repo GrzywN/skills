@@ -6,7 +6,7 @@
 | Target user | [who, and "assumed" if you inferred it] |
 | Core job | [the job to be done, and "assumed" if you inferred it] |
 | Access | [URL, build, repository, test account] |
-| Compared with | [competitors, and "picked by the auditor" if the user named none] |
+| Compared with | [competitors, and who named them: the user, the product, or the auditor] |
 | Date | [YYYY-MM-DD] |
 | Time to first value | [N clicks, N fields, N characters, N seconds of waiting, at least N seconds for a person (estimate), on the path: step, step, step] |
 | Moments | [N WTF, N WOW, N missed WOW, N unverified] |
@@ -28,7 +28,9 @@
 | 5 | | | | |
 
 The score is the score of the record.
-An action for more than one record has the highest score and the highest severity among them.
+The fix of more than one WTF has the highest score among its WTF records.
+An action that surfaces a WOW has the score of the WOW at its new position and reach.
+Each fix of a WTF is above each WOW action.
 
 ## 3. WTF list
 
@@ -55,16 +57,20 @@ Each record has the same fields as a WTF record, with these changes:
 - **Flags:** [hidden, late, fragile, or none, each with its reason]
 - **Root cause:** [what makes the moment work]
 - No **Reproduced** field
-- **Proposed change:** [how to protect it, or how to bring it earlier]
+- **Proposed change:** [how to make it visible, bring it earlier or protect it, or "none"]
 
 ### WOW-01: [the beaten expectation, in one line]
 
 ## 5. WOW opportunities
 
 The missed WOW records, ranked by score, the highest first.
-Each record has the same fields as a WTF record, with **Type:** missed WOW.
-The score uses the severity that the moment reaches after the proposed change.
-Each one says if it makes the core job faster, safer or better.
+Each record has the same fields as a WTF record, with these changes:
+
+- **Type:** missed WOW
+- **Score:** [with the severity that the moment reaches after the proposed change]
+- **Root cause:** [what is missing]
+- No **Reproduced** field
+- **Proposed change:** [the change, and if it makes the core job faster, safer or better]
 
 ### MISS-01: [the moment that can beat the expectation, in one line]
 
@@ -84,7 +90,7 @@ Each one says if it makes the core job faster, safer or better.
 | Leaving or cancelling | | | | | |
 
 Each cell is one of: walked, partly (with the reason), not reached, not applicable, out of scope.
-The "Errors and edge cases" row has what step 4 of the workflow covered.
+In the "Errors and edge cases" row, write what step 4 of the workflow covered in the column of the setup that it ran in, and "not applicable" in the other columns.
 
 States visited on the key screens: [screen: empty, loading, error, partial].
 Wrong things done: [flow: empty input, huge input, back, refresh, double click, expired session, offline].
@@ -103,4 +109,4 @@ Created by the audit: [each account and each record that you created, and each f
 
 - [the instance: local, staging or production, and what it hides]
 - [the reach values: from analytics, or estimated by the auditor]
-- [the tools: for example an accessibility tree in place of a real screen reader]
+- [the tools: the device and the network profile of the phone lens, an accessibility tree in place of a real screen reader]

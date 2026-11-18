@@ -1,7 +1,7 @@
 # The walk: stages, lenses, states and wrong things
 
 Read this file when you walk a stage or a lens, force a state, or do the wrong thing on purpose.
-The lists are prompts for your attention, not a checklist to fill in.
+The lists of the stages and the lenses are prompts for your attention, not a checklist to fill in.
 Record only what you observed.
 
 ## Stages
@@ -28,6 +28,12 @@ For stage 8, find the path and count its steps, and stop before the last confirm
 
 ## Lenses
 
+Run the four lenses after the first-time walk in parallel when you can start subagents and each one has its own account or its own instance of the product.
+Do not create accounts on a shared instance to make this possible.
+With one shared account, run the lenses one after another, because the records of one walk change what the next one sees.
+Give each subagent this skill, the frame from `walk-log.md`, the moments found so far, its lens, and its account or instance.
+You do the scoring and the ranking yourself, after all of them report.
+
 ### First-time user with no context
 
 - Start from a clean session: no cookies, no stored login, no knowledge from the code or the docs.
@@ -40,7 +46,7 @@ For stage 8, find the path and count its steps, and stop before the last confirm
 ### Daily power user
 
 - Use an account that has data.
-  If the test account is empty, create ten or more records of your own first.
+  If the test account is empty, create ten or more records of your own first, or as many as the product allows.
 - Do the core job five times in a row.
   Each step that is the same all five times is a candidate for a default, a shortcut or a bulk action.
 - Look for keyboard shortcuts, search, filter, sort, duplicate, templates, undo, and a URL for each item that the user can share.
@@ -68,7 +74,6 @@ This person decides in a few minutes whether the product is worth their time, an
   An emulated phone has no keyboard on the screen, so read the `type`, `inputmode` and `autocomplete` of each input.
   A text size under 16 pixels in an input makes iOS Safari zoom in on focus.
   Chromium does not show that zoom, so read the computed `font-size` of each input.
-- Cut the connection in the middle of a flow.
 
 ### Keyboard and screen reader
 
@@ -96,7 +101,7 @@ Visit the four states on each key screen.
 | Error | Fail one request, go offline, send input that the server rejects | Says in the words of the user what happened and what to do, keeps the input, and lets the user try again |
 | Partial | One item, very many items, very long text, optional data that is missing, one failed request of several, a setup that is half done | The layout holds, and no text reads `undefined`, `null` or `NaN` |
 
-To delay or fail a request in your own browser does not change the product, so the audit stays read-only.
+A request that you delay or fail in your own browser does not change the product, so the audit stays read-only.
 
 ## Wrong things
 
@@ -113,4 +118,4 @@ After each one, check for lost work first, because lost work can be severity 5.
 | Expired session | Delete the session cookie or token in your own browser in the middle of a flow, then go on | Says that the session ended, and returns to the same place with the input after login |
 | No connection | Go offline before a submit, and in the middle of a load | Says so, keeps the input, and tries again or lets the user try again |
 
-Then try what the product itself suggests: a deep link while logged out, the same flow in two tabs, a paste with spaces around the value, a date or a number in a different local format.
+Then try what fits the product: a deep link while logged out, the same flow in two tabs, a paste with spaces around the value, a date or a number in a different local format.

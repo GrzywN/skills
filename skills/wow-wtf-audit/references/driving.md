@@ -8,7 +8,7 @@ Read this file before the first walk.
 | --- | --- | --- |
 | Web app | The browser tool that you have. With none, a Playwright script. | The first result made from the user's own input |
 | Mobile app | An emulator or a simulator, if you have one | The same |
-| CLI | A clean shell, with no config from an earlier run | The first command that does the job with success |
+| CLI | A shell with `HOME` set to a new temporary directory, so that no config from an earlier run is there | The first command that does the job with success |
 | API or SDK | The quickstart of the docs, typed out as a new developer does | The first call that returns the data of the user |
 
 For a mobile app with no emulator, walk the mobile web version in a phone viewport, and list the native app under "could not reach".
@@ -26,10 +26,15 @@ The stages fit each type of product.
 | Coming back | A new session | An upgrade to a new version | A version change, a key that expired |
 | Leaving | Cancel, delete, export | Uninstall, what is left on the disk | Delete the key, export the data |
 
-Two lenses change for a CLI or an API.
+For a CLI or an API, read the other parts of the audit in this way.
 
+- The first screen is the top of the README and the output of the bare command.
 - The phone lens is a terminal of 80 columns, a slow network, and output that goes to a pipe or a CI log.
 - The screen reader lens is plain output: `NO_COLOR=1`, no spinner, and no meaning that only a colour or a symbol carries.
+- The four states are: no input, a long run, a failure, and a run that stops in the middle.
+- The wrong things are: no argument, a wrong flag, huge input, the same command twice, two runs at the same time, an expired token, no network, Ctrl+C.
+- Count commands in place of clicks.
+- Do not touch the real config of the user.
 
 A lens that has no meaning for the product is "not applicable" in the Coverage table.
 
@@ -37,8 +42,9 @@ For a CLI or an API, the evidence is the exact command or request, the full outp
 
 ## Start a product from its repository
 
-- Follow the README or the `Makefile`, and do nothing else.
-  Each step that the README does not have, and each error on the way, is a moment for a developer product.
+- Follow the README or the `Makefile`.
+  Each step that the README does not have, and each error on the way, is a WTF for a developer product.
+  The read-only rules of `SKILL.md` say which missing step you can take.
 - Note the commit and the port.
 - Do not read the source on the way.
   The first-time walk comes first.
@@ -80,14 +86,14 @@ await devtools.send('Emulation.setCPUThrottlingRate', { rate: 4 });
 await devtools.send('Network.emulateNetworkConditions', { offline: true, ...slowNetwork });
 await phone.clearCookies();
 
-await page.route('**/api/invoices', (route) => route.abort());
-await page.route('**/api/invoices', (route) => route.fulfill({ status: 500 }));
-await page.route('**/api/invoices', async (route) => {
+await page.route('**/api/orders', (route) => route.abort());
+await page.route('**/api/orders', (route) => route.fulfill({ status: 500 }));
+await page.route('**/api/orders', async (route) => {
   const response = await route.fetch();
   await new Promise((resolve) => setTimeout(resolve, 5000));
   await route.fulfill({ response });
 });
-await page.route('**/api/invoices', async (route) => {
+await page.route('**/api/orders', async (route) => {
   await route.fetch();
   await route.abort();
 });
@@ -113,8 +119,8 @@ const sidewaysScroll = await page.evaluate(
 - The four `page.route` calls are alternatives: a request that fails, an error of the server, a late answer, and an answer that is lost after the server did the work.
   A delay before `route.continue()` holds the request in the browser, so the server does not get it in that time.
   When more than one handler matches a URL, the one that you added last runs.
-  `page.unroute('**/api/invoices')` removes them and gives the real response back.
-  The pattern `**/api/invoices` matches only that path, not `/api/invoices/7` and not `/api/invoices?page=2`.
+  `page.unroute('**/api/orders')` removes them and gives the real response back.
+  The pattern `**/api/orders` matches only that path, not `/api/orders/7` and not `/api/orders?page=2`.
 - `clearCookies()` in the middle of a flow is the expired session, when the session is a cookie.
   For a token in the storage, clear `localStorage` and `sessionStorage` in the page too.
 - A double click is `locator.dblclick()`.
@@ -128,7 +134,7 @@ const sidewaysScroll = await page.evaluate(
 
 ## Evidence
 
-- Name a screenshot that you take for a record after its ID: `evidence/WTF-03-signup-cleared.png`.
+- Name a screenshot that you take for a record after its ID: `evidence/WTF-03-import-28-of-240.png`.
   A screenshot from a walk keeps its name, and the record gives its path.
 - Take the screenshot at the moment of the broken expectation, with the URL or the screen name in the record.
   For a wait, take one screenshot in the middle of the wait.
@@ -144,14 +150,16 @@ Time it inside one script.
 
 ```javascript
 const started = Date.now();
-await page.getByRole('button', { name: 'Submit' }).click();
+await page.getByRole('button', { name: 'Save' }).click();
+const result = page.getByRole('status').waitFor().then(() => (Date.now() - started) / 1000);
 await page.waitForTimeout(1000);
-await page.screenshot({ path: 'evidence/WTF-05-one-second-after-submit.png' });
-await page.getByRole('table').waitFor();
-const secondsToResult = (Date.now() - started) / 1000;
+await page.screenshot({ path: 'evidence/WTF-05-one-second-after-save.png' });
+const secondsToResult = await result;
 ```
 
+- Start to wait for the result before the timeout, as the sample does, or each wait reads as more than 1 second.
 - The screenshot after 1 second shows if the user has feedback by then: a spinner, a disabled button, a message.
+  If the result is in the screenshot, the wait was under 1 second.
 - `secondsToResult` is the length of the wait.
 - For a page load, read `performance.getEntriesByType('navigation')[0]` in the page.
 
@@ -176,4 +184,4 @@ Then replay the path as a script from a clean session, and report two numbers of
   The model is for a practised user who makes no errors, so for a first-time user the estimate is a lower limit.
   Say that in the report.
 
-Report the path with the numbers, for example "9 clicks, 10 fields, 90 characters, 6 seconds of waiting, at least 85 seconds for a person: landing, signup, list, new invoice, submit".
+Report the path with the numbers, for example "9 clicks, 10 fields, 90 characters, 6 seconds of waiting, at least 85 seconds for a person: landing, signup, dashboard, new project, publish".
