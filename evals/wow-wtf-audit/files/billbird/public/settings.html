@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings - Billbird</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="settings">
+<header class="topbar">
+  <a class="brand" href="/invoices.html">Billbird</a>
+  <nav class="nav">
+    <a href="/invoices.html">Invoices</a>
+    <a href="/invoice-new.html">Create</a>
+    <a href="/settings.html">Settings</a>
+  </nav>
+  <div class="account">
+    <span id="account-name" class="account-name"></span>
+    <button type="button" id="logout" class="link-button">Log out</button>
+  </div>
+</header>
+<main class="page">
+  <h1>Settings</h1>
+  <p id="form-message" class="message" hidden></p>
+  <form id="settings-form" class="card stack">
+    <h2>Profile</h2>
+    <label class="field">
+      <span>Name</span>
+      <input type="text" name="name" autocomplete="name" required>
+    </label>
+    <label class="field">
+      <span>Email</span>
+      <input type="email" name="email" disabled>
+    </label>
+    <label class="field">
+      <span>Company</span>
+      <input type="text" name="company" autocomplete="organization">
+    </label>
+    <h2>Business</h2>
+    <label class="field">
+      <span>Street</span>
+      <input type="text" name="street" autocomplete="street-address">
+    </label>
+    <label class="field">
+      <span>City</span>
+      <input type="text" name="city" autocomplete="address-level2">
+    </label>
+    <label class="field">
+      <span>Postal code</span>
+      <input type="text" name="postalCode" autocomplete="postal-code">
+    </label>
+    <label class="field">
+      <span>Country</span>
+      <input type="text" name="country" autocomplete="country-name">
+    </label>
+    <label class="field">
+      <span>Tax ID</span>
+      <input type="text" name="taxId">
+    </label>
+    <label class="field">
+      <span>Default payment terms</span>
+      <select name="paymentTerms">
+        <option value="0">Due on receipt</option>
+        <option value="7">Net 7</option>
+        <option value="14">Net 14</option>
+        <option value="30">Net 30</option>
+      </select>
+    </label>
+    <button type="submit" class="button primary">Save settings</button>
+  </form>
+  <details class="card labs">
+    <summary>Labs</summary>
+    <label class="toggle">
+      <input type="checkbox" id="repeat-last-invoice">
+      <span>Repeat last invoice</span>
+    </label>
+    <p class="muted">Start a new invoice from the most recent one you created.</p>
+    <p id="labs-status" class="muted" hidden>Saved</p>
+  </details>
+  <section class="card stack">
+    <h2>Account</h2>
+    <div>
+      <button type="button" id="delete-account" class="button danger">Delete account</button>
+    </div>
+    <p id="delete-account-info" hidden>To delete your account, email support@billbird.test from your registered address.</p>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

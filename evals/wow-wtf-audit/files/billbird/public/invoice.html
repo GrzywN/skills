@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice - Billbird</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="invoice">
+<header class="topbar">
+  <a class="brand" href="/invoices.html">Billbird</a>
+  <nav class="nav">
+    <a href="/invoices.html">Invoices</a>
+    <a href="/invoice-new.html">Create</a>
+    <a href="/settings.html">Settings</a>
+  </nav>
+  <div class="account">
+    <span id="account-name" class="account-name"></span>
+    <button type="button" id="logout" class="link-button">Log out</button>
+  </div>
+</header>
+<main class="page">
+  <p id="banner" class="message" hidden></p>
+  <p id="invoice-missing" class="muted" hidden>Invoice not found. <a href="/invoices.html">Back to the list</a></p>
+  <article id="invoice-view" class="card invoice-view" hidden>
+    <header class="invoice-head">
+      <div>
+        <h1 id="invoice-number"></h1>
+        <span id="invoice-status" class="status"></span>
+      </div>
+      <div class="invoice-actions">
+        <button type="button" id="send-invoice" class="button primary">Send invoice</button>
+        <button type="button" id="download-pdf" class="button">Download PDF</button>
+      </div>
+    </header>
+    <div class="invoice-parties">
+      <div>
+        <h2>From</h2>
+        <p id="invoice-from"></p>
+      </div>
+      <div>
+        <h2>Billed to</h2>
+        <p id="invoice-client"></p>
+      </div>
+      <div>
+        <h2>Dates</h2>
+        <p>Issued <span id="invoice-issued"></span><br>Due <span id="invoice-due"></span></p>
+      </div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th class="numeric">Quantity</th>
+          <th class="numeric">Rate</th>
+          <th class="numeric">Amount</th>
+        </tr>
+      </thead>
+      <tbody id="invoice-items"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" class="numeric">Total</td>
+          <td class="numeric"><strong id="invoice-total"></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  </article>
+</main>
+<div id="pro-overlay" class="overlay" hidden>
+  <div class="dialog">
+    <span id="pro-close" class="dialog-close">x</span>
+    <h2>PDF export is a Pro feature - $12/month</h2>
+    <button type="button" id="pro-upgrade" class="button primary">Upgrade</button>
+    <form id="card-form" class="stack card-form" hidden>
+      <label class="field">
+        <span>Card number</span>
+        <input type="text" name="cardNumber" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456">
+      </label>
+      <div class="card-row">
+        <label class="field">
+          <span>Expiry</span>
+          <input type="text" name="cardExpiry" autocomplete="cc-exp" placeholder="MM/YY">
+        </label>
+        <label class="field">
+          <span>CVC</span>
+          <input type="text" name="cardCvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123">
+        </label>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>
