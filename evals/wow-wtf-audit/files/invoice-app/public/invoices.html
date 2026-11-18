@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoices - Kwit</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="shell list-shell">
+    <header class="app-header">
+      <a class="brand" href="/invoices">Kwit</a>
+      <nav>
+        <a href="/settings">Settings</a>
+        <button class="link-button" id="logout" type="button">Log out</button>
+      </nav>
+      <div class="icon-button" id="new-invoice">+</div>
+    </header>
+    <main id="content"></main>
+  </div>
+  <div class="toast" id="toast" role="status" hidden>
+    <span>Invoice deleted.</span>
+    <button class="link-button" id="undo" type="button">Undo</button>
+  </div>
+  <script type="module" src="/static/invoices.js"></script>
+</body>
+</html>
