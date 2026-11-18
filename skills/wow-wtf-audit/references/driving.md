@@ -71,16 +71,11 @@ const phone = await browser.newContext({ ...devices['iPhone 13'] });
 const page = await phone.newPage();
 
 const devtools = await phone.newCDPSession(page);
-await devtools.send('Network.enable');
-await devtools.send('Network.emulateNetworkConditions', {
-  offline: false,
-  latency: 150,
-  downloadThroughput: 200_000,
-  uploadThroughput: 93_750,
-});
+const slowNetwork = { latency: 150, downloadThroughput: 200_000, uploadThroughput: 93_750 };
+await devtools.send('Network.emulateNetworkConditions', { offline: false, ...slowNetwork });
 await devtools.send('Emulation.setCPUThrottlingRate', { rate: 4 });
 
-await phone.setOffline(true);
+await devtools.send('Network.emulateNetworkConditions', { offline: true, ...slowNetwork });
 await phone.clearCookies();
 
 await page.route('**/api/invoices', (route) => route.abort());
@@ -101,6 +96,9 @@ const sidewaysScroll = await page.evaluate(
 - The throughput values are in bytes per second.
   The values above are about 1.6 Mbit/s down, 750 kbit/s up and 150 ms of latency, with a CPU that is 4 times slower.
   That is the slow 4G profile that Lighthouse uses for a mid-range phone.
+- The second `Network.emulateNetworkConditions` call cuts the connection.
+  In a context with this throttle, `context.setOffline(true)` has no effect.
+  In a context with no throttle, use `context.setOffline(true)`.
 - The three `page.route` calls are alternatives.
   When more than one handler matches a URL, the one that you added last runs, so remove a handler with `page.unroute` before you add the next one.
 - `clearCookies()` in the middle of a flow is the expired session.
