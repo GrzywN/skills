@@ -42,6 +42,8 @@ For a CLI or an API, the evidence is the exact command or request, the full outp
 - Note the commit and the port.
 - Do not read the source on the way.
   The first-time walk comes first.
+- The log of the server that you started is behaviour, not source.
+  Read it when a request fails.
 
 ## What your browser tool must do
 
@@ -81,8 +83,13 @@ await phone.clearCookies();
 await page.route('**/api/invoices', (route) => route.abort());
 await page.route('**/api/invoices', (route) => route.fulfill({ status: 500 }));
 await page.route('**/api/invoices', async (route) => {
+  const response = await route.fetch();
   await new Promise((resolve) => setTimeout(resolve, 5000));
-  await route.continue();
+  await route.fulfill({ response });
+});
+await page.route('**/api/invoices', async (route) => {
+  await route.fetch();
+  await route.abort();
 });
 
 const focused = await page.evaluate(() => document.activeElement?.outerHTML.slice(0, 200));
@@ -103,13 +110,17 @@ const sidewaysScroll = await page.evaluate(
 - The second `Network.emulateNetworkConditions` call cuts the connection.
   In a context with this throttle, `context.setOffline(true)` has no effect.
   In a context with no throttle, use `context.setOffline(true)`.
-- The three `page.route` calls are alternatives.
+- The four `page.route` calls are alternatives: a request that fails, an error of the server, a late answer, and an answer that is lost after the server did the work.
+  A delay before `route.continue()` holds the request in the browser, so the server does not get it in that time.
   When more than one handler matches a URL, the one that you added last runs.
   `page.unroute('**/api/invoices')` removes them and gives the real response back.
   The pattern `**/api/invoices` matches only that path, not `/api/invoices/7` and not `/api/invoices?page=2`.
 - `clearCookies()` in the middle of a flow is the expired session, when the session is a cookie.
   For a token in the storage, clear `localStorage` and `sessionStorage` in the page too.
 - A double click is `locator.dblclick()`.
+- On an emulated phone, a page that is wider than the screen does not act as on a real phone.
+  `locator.tap()` and `locator.click()` time out on a control outside the screen, and `window.scrollTo` does not move the page.
+  Use `page.touchscreen.tap(x, y)` at the centre of the bounding box of the control, and record that a person needs a sideways swipe to get there.
 - To walk with the keyboard, press Tab until the focus returns to the first control, and log the focused element after each press.
   A control that is not in the log cannot be reached with Tab.
   Check a radio group, a tab list or a menu with the arrow keys.
@@ -117,7 +128,8 @@ const sidewaysScroll = await page.evaluate(
 
 ## Evidence
 
-- Name each file after the ID of the record: `evidence/WTF-03-signup-cleared.png`.
+- Name a screenshot that you take for a record after its ID: `evidence/WTF-03-signup-cleared.png`.
+  A screenshot from a walk keeps its name, and the record gives its path.
 - Take the screenshot at the moment of the broken expectation, with the URL or the screen name in the record.
   For a wait, take one screenshot in the middle of the wait.
   For lost work, take one before and one after.

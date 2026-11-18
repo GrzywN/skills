@@ -49,7 +49,7 @@ If you cannot name the source, drop the record.
 | An account, when the product has a signup: the permission to sign up, with a mailbox from the user if the product checks the address, or a test account | Ask, unless you start the instance yourself from the repository. Prefer the permission to sign up, because a ready account skips the signup and the onboarding. |
 | The target user | Take it from the request or the README. If only the landing page has it, take it after the first-screen test of step 2. State it as an assumption at the top of the report. |
 | The core job of that user (the job to be done) | The same. |
-| The competitors | Use the alternatives that the product names itself. If it names none, pick the two that a buyer would compare first, and say that you picked them. |
+| The competitors, only when you walk the skeptical evaluator lens | Use the alternatives that the product names itself. If it names none, pick the two that a buyer would compare first, and say that you picked them. |
 
 Ask only for the first two, in one message, and only when the request, the product and the repository do not answer them.
 Infer the other three, and state them as assumptions.
@@ -79,14 +79,16 @@ The product, its code, its settings and the data of other people are the same af
   The one exception is a test card that the user gave you, in a sandbox.
 - **Steps that cannot be undone.**
   Walk a purchase, an upgrade, a cancellation and an account deletion up to the last step before the one that cannot be undone, and stop there.
+  When you cannot tell if a step can be undone, treat it as one that cannot.
 - **Other people.**
   Do not send a message, an invitation or an email to a real person.
   When the core job sends one, send it only to an address that the user gave you for the test.
   Look at competitors only through their public pages.
 
 An instance that you started yourself from the repository, with its own data, is the one exception.
-There you can sign up with an `@example.com` address, save a setting of your own account, and delete your own records.
-Start it in the way its README or `Makefile` says, and stop each process that you started when the audit ends.
+There you can sign up with an `@example.com` address, save a setting of your own account, delete your own records, and start the instance again to get fresh data.
+Start it in the way its README or `Makefile` says.
+Note the ID of each process that you start, and stop only those when the audit ends.
 
 When a step needs more than this, do not take it.
 List the step under "could not reach" in the Coverage section.
@@ -108,8 +110,9 @@ Progress:
 - [ ] 7. Score and rank
 - [ ] 8. Write the report and check it
 
-When the user asks for a part of the audit, such as one stage, one lens or one flow, walk only that part.
-Keep the record, the score and the six sections of the report, and say in the Coverage section what you left out.
+When the user asks for a part of the audit, such as one stage, one lens, one flow or one complaint to check, walk only that part.
+For a complaint, the part is each flow and each screen that can cause it.
+Keep the record, the score and the six sections of the report, and mark what you left out as "out of scope" in the Coverage section.
 
 ### 1. Frame the audit
 
@@ -177,6 +180,7 @@ On each key flow, do the wrong thing on purpose: empty input, huge input, the ba
 
 Do this once, with the desktop setup of the first-time user.
 Then repeat only the "no connection" probe on the phone, and only the error state with the keyboard.
+In an audit of one lens, do all of it in the setup of that lens.
 The probes and the ways to force each state are in `references/walkthrough.md`.
 
 ### 5. Reproduce each WTF a second time
@@ -214,6 +218,8 @@ Use the score and the ranking rules below.
 Copy `assets/report-template.md` and fill it in.
 Write the report in the language of the request, and keep the labels WTF and WOW.
 Put the verdict and the top 5 actions in your reply too, with the path of the report.
+When the request names a problem, answer that first in your reply, and say where its records are in the ranking.
+Do not change the rank for it.
 
 Then check the report against this list, and fix what fails:
 
@@ -248,6 +254,7 @@ Write one record for each moment.
 ```
 
 A WOW record has one more field, **Flags:** hidden, late, fragile, or none, each with its reason.
+A WOW or a missed WOW record has no **Reproduced** field, and its **Root cause** says what makes the moment work, or what is missing.
 
 Give each moment an ID when you find it: `WTF-01`, `WOW-01` and `MISS-01`, in the order of discovery.
 Do not change an ID later, because the evidence files have it in their names.
@@ -270,7 +277,7 @@ Score = severity x reach x position.
 | 5 | Lost work, lost money, lost data, a privacy surprise, or the core job cannot be done | The user would show it to another person |
 
 - When two rows fit, take the higher one.
-- Lost work is severity 5 when it took the user more than one minute to make.
+- Lost work is severity 5 when it took the user more than one minute to make, by the time estimate of `references/driving.md`.
   Less than that is severity 3.
 - A wait with no feedback is severity 1 up to 3 seconds, 2 up to 10 seconds, and 3 over 10 seconds.
 - For a missed WOW, use the row that the moment reaches after the proposed change.
@@ -288,6 +295,9 @@ Score = severity x reach x position.
   The position does that.
 - A lens is not a reach.
   A moment on a phone is 0.3 only when a minority of the target users has a phone in hand.
+  The reach is a share of all target users, also in an audit of one lens.
+- A state that you forced, such as an ended session or a lost connection, has the reach of the users who meet that state in real use.
+  With no numbers, that is 0.1.
 - With analytics from the user, use the real share.
   With none, say in the Coverage section that the reach is your estimate.
 
@@ -307,16 +317,19 @@ Score = severity x reach x position.
 
 - **Rank by the impact on the user, not by the cost of the change.**
   The cost is not a part of the score, and not a tie-break.
-  With the same score, the higher severity goes first, then the earlier stage.
+- **One action for one change.**
+  When one change fixes more than one record, write one action that lists each ID.
+  Its score and its severity are the highest among them.
 - **WTF before WOW.**
   A broken expectation costs more trust than a delight earns.
-  In the top 5, the fix of a WTF goes before a WOW action.
-  The one exception: a WTF of severity 1 or 2 goes below a WOW action that has a higher score.
+  Put the actions in two groups, the first group before the second, and rank each group by score.
+  The first group has the fix of each WTF of severity 3 or more.
+  The second group has the fix of each WTF of severity 1 or 2, and each WOW action.
+  With the same score, the fix of a WTF goes first, then the higher severity, then the earlier stage.
+  The top 5 is the first five actions of that list.
 - **A WOW that is followed by a WTF is remembered as a WTF.**
-  A WOW action does not go above the fix of a WTF that the user meets after it on the critical path.
-- **One action for one root cause.**
-  When more than one record has the same root cause, write one action that lists each ID.
-  Its score is the highest score among them.
+  In the second group, a WOW action does not go above the fix of a WTF that the user meets after it on the critical path.
+  Move that WOW action down, to the place after the fix.
 - **The core job before decoration.**
   Rank a WOW action that makes the core job faster, safer or better above one that does not.
   Animation and confetti do not count, unless the moment under them already works.
@@ -346,6 +359,9 @@ The template is `assets/report-template.md`.
 - You are patient, and a user is not.
   You do not feel a wait of 3 seconds between two tool calls, so time each wait in a script.
   A wait over 1 second with no feedback is a WTF.
+- You are fast, and a user is not.
+  A script that types before the page is ready makes a moment that no person meets.
+  Wait as a person does, or record the moment as a state that you forced.
 - You read each word, and a user scans.
   Internal terms, two names for one thing, and an error code in place of a sentence are copy that a user must read twice.
 - A local build is not production.
