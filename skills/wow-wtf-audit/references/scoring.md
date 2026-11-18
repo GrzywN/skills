@@ -1,7 +1,7 @@
 # Scoring and ranking
 
 Score = severity x reach x position.
-The lowest score is 0.1 and the highest is 15.
+With the bands below, the lowest score is 0.1 and the highest is 15.
 Give the three factors in each record, so that the reader can disagree with one factor and not with the whole score.
 
 ## Severity
@@ -10,14 +10,13 @@ For a WTF, severity is the damage.
 
 | Severity | A WTF |
 | --- | --- |
-| 5 | The user cannot do the core job, loses work or data, or meets a cost or a permission request that nothing announced |
-| 4 | The user is stopped, and continues only with a workaround or with help |
-| 3 | The user gets through after a retry, an unexplained wait, or a second read |
+| 5 | The user cannot do the core job, loses data or work that takes more than a minute to do again, or meets a cost or a permission request that nothing announced |
+| 4 | The user is stopped, and continues only with a workaround, a guess or help |
+| 3 | The user gets through after a retry, an unexplained wait, a second read, or steps that the core job does not need |
 | 2 | The user sees the problem and loses a little time or confidence |
 | 1 | Cosmetic |
 
 For a WOW and a missed WOW, severity is the strength of the moment.
-For a missed WOW, score the moment as it is after the proposed change.
 
 | Severity | A WOW |
 | --- | --- |
@@ -46,9 +45,9 @@ With no data, estimate with these bands and say that the number is an estimate.
 
 | Position | Stage |
 | --- | --- |
-| 3 | Before first value: first impression, signup and onboarding, first value |
+| 3 | Up to first value: first impression, signup and onboarding, first value |
 | 2 | The core loop |
-| 1 | After it: settings and billing, coming back after a break, leaving or cancelling |
+| 1 | The other stages: settings and billing, coming back after a break, leaving or cancelling |
 
 An error or an edge case has the position of the stage where the user hits it.
 
@@ -56,21 +55,25 @@ An error or an edge case has the position of the stage where the user hits it.
 
 1. Rank the WTF list by score, highest first.
 2. Rank the WOW opportunities by score, highest first.
-   The missed WOW moments and the hidden WOW moments are both in this list.
-3. On equal scores, the earlier moment in the journey goes first.
-4. Do not change the order because a change is cheap or expensive to implement.
+   The missed WOW moments and the flagged WOW moments are both in this list.
+3. In the WOW opportunities, score each moment as it is after the proposed change: severity, reach and position.
+   In the "to protect" section, score each WOW as it is now.
+4. On equal scores, the earlier moment in the journey goes first.
+5. Do not change the order because a change is cheap or expensive to implement.
 
 ## The top 5 actions
 
 An action is one change.
-One action can close more than one moment that has the same root cause, and then it names each of them.
+One action can close more than one moment that has the same root cause.
+It names each of them, and it has the highest score of the moments that it closes.
 
-- A WTF with a severity of 3 or more goes before each WOW action, in score order.
-- A WTF with a severity of 1 or 2 competes with the WOW actions by score.
-  On equal scores, the WTF goes first.
-- A WOW action that is on the same path as an open WTF goes after the fix for that WTF.
+- Each WTF fix goes before each WOW action.
+  Order the WTF fixes by score, then the WOW actions by score.
+- A WOW action on the same path as an open WTF names that WTF in "Depends on".
   A WOW followed by a WTF is remembered as a WTF.
 - Decoration is not an action, unless the moment below it works already.
+- With fewer than five actions, give fewer.
+- List each "blocks a group" moment that is not in the top 5 in one line below the table.
 
 When the top 5 has only WTF fixes, that is a correct result.
 Say in the verdict that the product must first stop the loss of trust.
@@ -88,11 +91,11 @@ A flagged WOW also goes to the WOW opportunities, with the change that brings it
 
 ## Worked examples
 
-A signup form clears each field after a password error, and the form did not state the password rule.
-Severity 5, because the user loses the work.
+A signup form answers a password that fails an unstated rule with "Invalid input." and clears each field.
+Severity 4, because the user is stopped: the message does not name the field, and the user must guess the rule.
 Reach 0.6, because most first passwords fail a rule that nobody stated.
 Position 3, because it is before first value.
-Score 5 x 0.6 x 3 = 9.
+Score 4 x 0.6 x 3 = 7.2.
 
 The delete action in a list shows "Deleted. Undo" for eight seconds.
 It is a WOW with a severity of 4, because it forgives a mistake on the critical path.
@@ -101,8 +104,12 @@ Position 2, the core loop.
 Score 4 x 0.3 x 2 = 2.4.
 
 A dialog cannot be closed with the keyboard.
-Severity 5 for a keyboard user, because the user is trapped.
+Severity 5 for a keyboard user, because the user cannot continue.
 Reach 0.1, a small group.
 Position 2.
 Score 5 x 0.1 x 2 = 1.
-Mark it "blocks a group", so that the reader sees a blocker behind the low score.
+Flag it "blocks a group", so that the reader sees a blocker behind the low score.
+
+A feature that repeats the last piece of work with one click is behind a closed section of the settings.
+In the "to protect" section it is a WOW with the flag "hidden": 5 x 0.1 x 1 = 0.5, because few users find it.
+In the WOW opportunities, the proposed change puts the button on the main screen of the core loop: 5 x 0.6 x 2 = 6.

@@ -38,18 +38,22 @@
     {
       "id": 2,
       "name": "missing-inputs-pl",
-      "prompt": "Zrób mi audyt UX tej apki. Co w niej wkurza, a co jest fajne? Odpala się przez `make dev`.",
-      "expected_output": "The request gives no target user, no core job and no competitors. The agent reads what the product says about itself, proposes one target user and one core job, and asks the user to confirm them together with the competitors, in one message, in Polish. It does not present findings before the answer.",
+      "prompt": "Zrób mi audyt UX rejestracji i pierwszych kroków w tej apce, aż do pierwszej faktury. Co tam wkurza, a co jest fajne? Odpala się przez `make dev`.",
+      "expected_output": "The request gives no target user, no core job and no competitors, and it names a part of the journey. The copy of the product names one kind of user and one job, so the agent continues with them, puts them at the top of the report as an assumption, and asks the user to confirm them at the end, together with the competitors. It walks the stages up to first value, records moments only inside that scope, and marks the other stages as out of scope. The report is in Polish.",
       "files": [
         "evals/wow-wtf-audit/files/billbird"
       ],
       "expectations": [
-        "The response proposes a target user that comes from the copy of the product: a freelancer who bills by the hour",
-        "The response proposes a core job that comes from the copy of the product: to send a correct invoice to a client in a short time",
+        "The top of the report states a target user and a core job that come from the copy of the product (a freelancer who bills by the hour, and to send a correct invoice in a short time) as an assumption that the user did not confirm",
         "The response asks the user to confirm the target user and the core job",
-        "The response asks about competitors, and names none that it invented",
-        "All questions are in one message",
-        "The response has no ranked list of WTF or WOW moments before the answer of the user",
+        "The response asks about competitors, or says that none were given and that it compared the product with its own promises, and it names no competitor that it invented",
+        "The WTF list has the signup form that clears all fields after a password that fails a rule which the form did not state",
+        "The WTF list has the three onboarding steps with required fields and no skip",
+        "The WTF list has the save of the first invoice: the wait with no feedback, or the duplicate on a second click",
+        "The delete-account dead end in Settings has no full record, because it is outside the scope",
+        "The coverage section marks the stages after first value as out of scope",
+        "The time to first value is given in clicks and in seconds",
+        "Each score shows three factors: severity, reach and position",
         "The response is in Polish",
         "No file in the billbird folder is changed, added or deleted"
       ]
@@ -77,13 +81,13 @@
       "id": 4,
       "name": "rank-walk-notes",
       "prompt": "I walked our meal planning app Dinnerloop myself last week. Target user: a parent who plans the dinners of the week. Core job: get a week of dinners and one shopping list in five minutes. Below are my raw notes. Score them, rank them, and give me the top 5 actions.\n\nA. Signup: after the email it asks for a 6-digit code. The code email took about 3 minutes to come, three times out of three. The screen only says 'Enter code'. No resend button. Everybody has to pass this.\nB. Onboarding: 14 diet questions before the first plan, no skip. Everybody.\nC. First plan: the week view is great. One tap swaps a dinner and the shopping list updates at once. All 6 testers smiled here.\nD. 'Send list to my notes app' exists, but only under Settings > Advanced > Integrations. 2 of 6 testers found it, both loved it.\nE. Shopping list on a phone with a slow connection: I check an item and 2 seconds later it is unchecked again. 3 of 3 tries. About a third of our users shop on mobile data.\nF. Upgrade: the plan price is shown without tax. The real total shows only on the last checkout step. About 3 in 10 users open the upgrade screen.\nG. The Save button on the profile page is a slightly different green than all other buttons.\nH. A colleague says the app logged her out in the middle of a plan once and the week was gone. I tried 5 times and could not make it happen.\nI. Designer idea: confetti when the signup code is accepted.\nJ. The team wants G on top of the list, because it is a five minute fix.\nK. After the plan is generated, the shopping list is behind a second tab. 4 of 6 testers did not see the tab and asked where the list was.",
-      "expected_output": "Each note gets a score of severity x reach x position. The signup code wait is first and the onboarding questions are second. The unchecked item and the price without tax follow, because each WTF with a severity of 3 or more goes before each WOW action. The colleague's logout is unverified and has no rank. The confetti does not count, because the code step below it is broken. The green button stays at the bottom, and the response says that cost does not change the rank. The notes-app export is a hidden WOW to bring forward, and the week view is a WOW to protect.",
+      "expected_output": "Each note gets a score of severity x reach x position. The signup code wait is first, and the onboarding questions and the hidden shopping list follow. The unchecked item and the price without tax are also in the top 5, because each WTF fix goes before each WOW action. The colleague's logout is unverified and has no rank. The confetti does not count, because the code step below it is broken. The green button stays at the bottom, and the response says that cost does not change the rank. The notes-app export is a hidden WOW to bring forward, and the week view is a WOW to protect. The response says that it did not walk the product.",
       "files": [],
       "expectations": [
         "Each scored moment shows three factors: severity, reach and position",
         "Position is 3 for the notes before first value (A, B), 2 for the core loop (E) and 1 for the upgrade and the profile page (F, G)",
         "Action 1 of the top 5 fixes the signup code wait (A)",
-        "Action 2 of the top 5 fixes the 14 onboarding questions (B)",
+        "Actions 1 to 3 of the top 5 fix the signup code wait (A), the 14 onboarding questions (B) and the shopping list behind the second tab (K)",
         "The unchecked shopping item (E) and the price without tax (F) are in the top 5, and each is before every WOW action",
         "The price without tax (F) has a severity of 4 or 5, as a surprise cost",
         "The logout that could not be reproduced (H) is listed as unverified, and has no place in the ranked WTF list or in the top 5",
@@ -91,7 +95,23 @@
         "The green button (G) is not in the top 5, and the response says that the rank follows the impact on the user and not the cost of the fix",
         "The notes-app export (D) is flagged as hidden, with a change that brings it to the shopping list or to the plan",
         "The week view with the one-tap swap (C) is an existing WOW moment to protect",
-        "The shopping list behind the second tab (K) is in the ranked lists with a concrete change"
+        "The response says that it did not walk the product, and that the notes of the user are the evidence"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "two-sided-ask-first",
+      "prompt": "Do a WOW/WTF audit of Stallholder before our launch. It is a marketplace for handmade goods: makers open a stall and list their items, shoppers browse and order, and our support team approves new stalls in an admin panel. Staging is at https://staging.stallholder.example, and I can make you test accounts for whatever you need.",
+      "expected_output": "The product has more than one kind of user, so the journey is not known. The agent asks before it walks: which user and which core job the audit is for, which test accounts it needs, and which competitors to compare with, all in one message. It gives no findings and does not claim that it used the product.",
+      "files": [],
+      "expectations": [
+        "The response asks which kind of user the audit is for (the maker, the shopper or the support team), or proposes one and asks the user to confirm before the walk",
+        "The response asks for the core job of that user, or proposes one and asks the user to confirm",
+        "The response says which test accounts it needs",
+        "The response asks about competitors",
+        "All questions are in one message",
+        "The response has no WTF or WOW findings, no verdict and no top 5",
+        "The response does not claim that it opened or used the staging site"
       ]
     }
   ]
