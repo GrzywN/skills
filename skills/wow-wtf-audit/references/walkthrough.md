@@ -67,6 +67,7 @@ This person decides in a few minutes whether the product is worth their time, an
 - Check that each input opens the right keyboard.
   An emulated phone has no keyboard on the screen, so read the `type`, `inputmode` and `autocomplete` of each input.
   A text size under 16 pixels in an input makes iOS Safari zoom in on focus.
+  Chromium does not show that zoom, so read the computed `font-size` of each input.
 - Cut the connection in the middle of a flow.
 
 ### Keyboard and screen reader
@@ -78,7 +79,9 @@ This person decides in a few minutes whether the product is worth their time, an
   Each control has a name that says what it does, each field has a label, and each page has a title and headings.
   A button with only an icon often has no name.
 - A dialog takes the focus when it opens, keeps it inside, closes on Escape, and gives the focus back to the control that opened it.
-- An error, a toast and a result of a search are announced: look for `role="alert"`, `role="status"` or `aria-live`.
+- An error, a toast and the count of search results are announced.
+  Look for `alert`, `status` or `log` in the accessibility tree, and for `aria-live` in the DOM, because the tree does not show it.
+  A message that takes the focus needs none of these.
 - An accessibility tree is not a screen reader.
   Say in the Coverage section which of the two you used.
 

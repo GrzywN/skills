@@ -71,7 +71,7 @@ const phone = await browser.newContext({ ...devices['iPhone 13'] });
 const page = await phone.newPage();
 
 const devtools = await phone.newCDPSession(page);
-const slowNetwork = { latency: 150, downloadThroughput: 200_000, uploadThroughput: 93_750 };
+const slowNetwork = { latency: 562.5, downloadThroughput: 180_000, uploadThroughput: 84_375 };
 await devtools.send('Network.emulateNetworkConditions', { offline: false, ...slowNetwork });
 await devtools.send('Emulation.setCPUThrottlingRate', { rate: 4 });
 
@@ -88,23 +88,32 @@ await page.route('**/api/invoices', async (route) => {
 const focused = await page.evaluate(() => document.activeElement?.outerHTML.slice(0, 200));
 const accessibilityTree = await page.locator('body').ariaSnapshot();
 const sidewaysScroll = await page.evaluate(
-  () => document.documentElement.scrollWidth > window.innerWidth,
+  () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
 );
 ```
 
 - A new context is a clean session.
 - The throughput values are in bytes per second.
-  The values above are about 1.6 Mbit/s down, 750 kbit/s up and 150 ms of latency, with a CPU that is 4 times slower.
-  That is the slow 4G profile that Lighthouse uses for a mid-range phone.
+  The values above are the Slow 4G preset of Chrome DevTools: about 1.4 Mbit/s down, 675 kbit/s up and 562.5 ms of latency.
+  The CPU that is 4 times slower is what Lighthouse uses for a mid-range phone.
+- The throttle is for one page.
+  A new tab or a popup needs its own DevTools session.
+- Compare `scrollWidth` with `clientWidth` and not with `window.innerWidth`.
+  On an emulated phone, `innerWidth` grows with the content, so that check does not find the sideways scroll.
 - The second `Network.emulateNetworkConditions` call cuts the connection.
   In a context with this throttle, `context.setOffline(true)` has no effect.
   In a context with no throttle, use `context.setOffline(true)`.
 - The three `page.route` calls are alternatives.
-  When more than one handler matches a URL, the one that you added last runs, so remove a handler with `page.unroute` before you add the next one.
-- `clearCookies()` in the middle of a flow is the expired session.
+  When more than one handler matches a URL, the one that you added last runs.
+  `page.unroute('**/api/invoices')` removes them and gives the real response back.
+  The pattern `**/api/invoices` matches only that path, not `/api/invoices/7` and not `/api/invoices?page=2`.
+- `clearCookies()` in the middle of a flow is the expired session, when the session is a cookie.
+  For a token in the storage, clear `localStorage` and `sessionStorage` in the page too.
 - A double click is `locator.dblclick()`.
 - To walk with the keyboard, press Tab until the focus returns to the first control, and log the focused element after each press.
-  A control that is not in the log cannot be reached.
+  A control that is not in the log cannot be reached with Tab.
+  Check a radio group, a tab list or a menu with the arrow keys.
+  In a shadow root or an iframe, `document.activeElement` is the host, so read the focus inside it.
 
 ## Evidence
 
@@ -145,12 +154,14 @@ Count on the first-time walk, from the first screen to first value:
 
 - **Clicks:** each click or tap that is not a click into a field.
 - **Fields:** each field that the user must fill.
+- **Characters:** each character that the user must type.
 
 Then replay the path as a script from a clean session, and report two numbers of seconds:
 
 - The seconds that the product made the user wait: page loads and responses, added up.
-- An estimate for a person: the waits, plus about 2.5 seconds for each click, and about 3 seconds plus 0.3 seconds for each typed character for each field.
-  These values are from the Keystroke-Level Model: 1.35 seconds to think, 1.1 to point, 0.2 to click, 0.4 to move the hand to the keyboard, 0.28 for each key.
-  Say in the report that it is an estimate.
+- An estimate for a person: the waits, plus 2.5 seconds for each click, 3 seconds for each field, and 0.3 seconds for each character.
+  These values are from the Keystroke-Level Model: 1.2 seconds to think, 1.1 to point, 0.2 to click, 0.4 to move the hand to the keyboard, 0.28 for each key.
+  The model is for a practised user who makes no errors, so for a first-time user the estimate is a lower limit.
+  Say that in the report.
 
-Report the path with the numbers, for example "9 clicks, 10 fields, 6 seconds of waiting, about 85 seconds for a person: landing, signup, list, new invoice, submit".
+Report the path with the numbers, for example "9 clicks, 10 fields, 90 characters, 6 seconds of waiting, at least 85 seconds for a person: landing, signup, list, new invoice, submit".
