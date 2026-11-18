@@ -21,8 +21,8 @@ The result is a ranked list of changes, with evidence that the reader can check.
   Record it as a **missed WOW**.
 - **First value**: the first moment when the user has the result of the core job.
   An account is not value.
-- **Critical path**: the steps from the first screen to first value.
-- **Key screen**: a screen on the critical path, or a screen of the core loop where the user enters or changes data.
+- **Critical path**: the steps from the first screen to first value, and the steps of the core loop.
+- **Key screen**: a screen on the critical path where the user enters or changes data, or reads the result of the core job.
   Most products have three to eight.
 
 ## Rules
@@ -30,7 +30,9 @@ The result is a ranked list of changes, with evidence that the reader can check.
 **Read-only.**
 Do not change the code, the configuration or the data of the product.
 Do not spend money, and do not create accounts beyond the test access that the user gave.
-Inside that test access, act as a user: the records that a user makes there and the account settings that a user changes there are part of the walk.
+Inside that test access, act as a user: the records that a user makes there are part of the walk.
+Change an account setting only when you can change it back, and change it back after you record the moment.
+Do not change the password or the email of an account that the user gave.
 Sign up for a new account only on a build that you started yourself, or when the user said that you can.
 Do not fix a defect during the audit, also when the fix is one line.
 A fix changes the product that the remaining lenses must see.
@@ -58,7 +60,7 @@ Each moment has one record.
 - **What happened:** <what the product did>
 - **Expected:** <what a reasonable user expected, and where that expectation comes from>
 - **Evidence:** <numbered reproduction steps, and the path of the screenshot>
-- **Reproduced:** <twice, the second time in a clean session | once, and why>
+- **Reproduced:** <twice, the second time in a clean session | once, for a WOW only>
 - **Type:** WTF | WOW | missed WOW
 - **Score:** <severity> x <reach> x <position> = <score>
 - **Flags:** <blocks a group | hidden | late | fragile | none>
@@ -66,9 +68,13 @@ Each moment has one record.
 - **Proposed change:** <concrete enough to implement>
 ```
 
-Write Where, What happened, Expected and Evidence when you see the moment.
+Write Where, What happened, Expected, Evidence and Type when you see the moment.
 After forty screens you do not remember the first ones.
-The other fields come in steps 6 and 7.
+Reproduced and Root cause come in step 6, and Score, Flags and Proposed change in step 7.
+
+A WTF that you saw only once goes to the unverified list.
+A WOW to protect has "What can break it" in place of Root cause and Proposed change.
+A WOW opportunity has "What happens now", and "Depends on" in place of Root cause.
 
 The expectation needs a source: the copy of the product, an earlier screen, a platform convention, or the core job.
 A moment with no source is your opinion, and does not go in the report.
@@ -95,10 +101,11 @@ When the request does not give them, read what the product says about itself: it
 
 - The copy names one kind of user and one job: continue with them, put them at the top of the report as an assumption, and ask the user to confirm them at the end.
   A different answer changes the ranking, and the observations stay valid.
-- The copy names more than one kind of user, or none: ask before you walk, and wait for the answer, because the journey itself is not known.
+- The request or the copy names more than one kind of user, or the copy names none: ask before you walk, and wait for the answer, because the journey itself is not known.
   When no person can answer, continue with the user and the job that the copy supports best, as an assumption.
 
 Ask all open questions in one message.
+When the user offers test accounts, ask for a fresh account and for an account with data.
 
 With no competitors, the skeptical evaluator compares the product with its own promises.
 
@@ -127,7 +134,7 @@ A moment that needs a rendered screen or a click is then unverified.
 When you cannot run the product, say so before you continue.
 A review of code alone is not this audit.
 Its report has the unverified list in the order to check it, with the file and the symbol of each item, the coverage section, and what you walk first when a build exists.
-It has no confirmed WTF, no confirmed WOW and no measured time.
+It has no confirmed WTF, no confirmed WOW, no top 5 and no measured time.
 
 ### 2. Plan the walk
 
@@ -142,13 +149,13 @@ Write down the stages of the journey for this product, in order:
 7. Coming back after a break.
 8. Leaving or cancelling.
 
-State what first value is for this product, and list the key screens.
+State what first value is for this product.
 
 A lens is done when each stage in the scope is walked, or is in the coverage section as not reached with the reason.
 When a WTF blocks the path, record it, go around it with the test account or a workaround, and continue.
 
 When you can start subagents and each one can have its own account, give each lens to one subagent.
-Give it the five inputs, the rules, the record format, its lens from `references/walk.md` and the evidence folder.
+Give it the inputs of step 1, the rules, the record format, its lens from `references/walk.md` and the evidence folder.
 It returns records with no score.
 When two lenses return the same moment, keep one record and name both lenses.
 A subagent that did not see the code is also a real first-time user.
@@ -158,8 +165,9 @@ Read `references/walk.md` now, before the first walk.
 
 ### 3. Walk as a first-time user
 
-Do this lens before you read the code or the docs.
+Do this lens before you read the source code.
 You can be a first-time user only once, because after you read the code you know where each control is.
+Before it, read from the repository only what you need to start the product and to find the target user and the core job.
 
 Start with a fresh browser profile, and with a fresh account when the rules allow one.
 With no fresh account, walk the signup to the last step before the submit, continue in the test account, and write "partly" in the coverage.
@@ -172,6 +180,8 @@ Record each point where you had to guess.
 Measure the time to first value: the clicks, the fields that the user types, the screens, and the seconds of waiting that the product causes.
 For the seconds of the whole path, run the same path in one script after the walk.
 Your own thinking time is in the first walk, and a person also reads, so call the number of the script a lower limit.
+
+After this walk, list the key screens.
 
 ### 4. Repeat the walk through the other lenses
 
@@ -211,7 +221,7 @@ With no code, give the root cause as a hypothesis and say that it is not confirm
 
 ### 7. Score and rank
 
-Score = severity (1 to 5) x reach (the share of the users at that stage who hit the moment, 0 to 1) x position (3 up to first value, 2 in the core loop, 1 in the other stages).
+Score = severity (1 to 5) x reach (the share of all the users of the product who hit the moment, 0 to 1) x position (3 up to first value, 2 in the core loop, 1 in the other stages).
 An error or an edge case has the position of the stage where the user hits it.
 A user who leaves at the signup never sees the settings, so an early moment weighs more.
 

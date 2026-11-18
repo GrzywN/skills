@@ -33,7 +33,7 @@ Ranked by score.
 - **What happened:** <what the product did>
 - **Expected:** <what a reasonable user expected, and where that expectation comes from>
 - **Evidence:** <numbered reproduction steps, and the path of the screenshot>
-- **Reproduced:** <twice, the second time in a clean session | once, and why>
+- **Reproduced:** <twice, the second time in a clean session>
 - **Type:** WTF
 - **Score:** <severity> x <reach> x <position> = <score>
 - **Flags:** <blocks a group | none>

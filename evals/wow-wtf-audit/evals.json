@@ -51,7 +51,7 @@
         "The WTF list has the three onboarding steps with required fields and no skip",
         "The WTF list has the save of the first invoice: the wait with no feedback, or the duplicate on a second click",
         "The delete-account dead end in Settings has no full record, because it is outside the scope",
-        "The coverage section marks the stages after first value as out of scope",
+        "The coverage section marks the core loop, settings and billing, coming back after a break, and leaving or cancelling as out of scope",
         "The time to first value is given in clicks and in seconds",
         "Each score shows three factors: severity, reach and position",
         "The response is in Polish",

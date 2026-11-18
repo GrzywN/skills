@@ -27,7 +27,7 @@ There, the phone lens is a slow or a broken network, and the keyboard and screen
 
 ### First-time user with no context
 
-- Setup: a fresh browser profile, and a fresh account when the rules allow one, before you read the code or the docs.
+- Setup: a fresh browser profile, and a fresh account when the rules allow one, before you read the source code.
 - Use only what the screen shows, and click each control by its visible text or its role.
 - Look for: jargon, a step with no reason, a choice with no default, a required field that the user cannot fill yet, a point where the next step is not clear.
 - Measure the time to first value here.
@@ -144,5 +144,8 @@ They start with `const { chromium, devices } = require('playwright')`.
 - On a page that has the throttle, `context.setOffline(true)` does not stop the requests.
   Send the throttle call with `offline: true`, or call `await cdp.detach()` first, which removes the throttle.
 - Compare the scroll width with `clientWidth` and not with `window.innerWidth`, because a phone zooms out on a page that is too wide and `innerWidth` grows with it.
-- A screenshot of the whole page does not show what is off the screen of a phone.
+- A screenshot of the whole page also shows the part that is off the screen of a phone, so it hides an overflow.
+  Use the screenshot of the viewport as the evidence for an overflow.
+- The outline style is only a hint: a focus ring made with `box-shadow` reads as `none`, and a transparent outline reads as `solid`.
+  Confirm the focus in the screenshot of that step.
 - Take a screenshot after each step, so that the one before a moment is the "before" picture.

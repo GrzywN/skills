@@ -28,15 +28,15 @@ For a WOW and a missed WOW, severity is the strength of the moment.
 
 ## Reach
 
-Reach is the share of the users at that stage who hit the moment, from 0 to 1.
-Position holds the users who left earlier, so do not count them a second time.
+Reach is the share of all the users of the product who hit the moment, from 0 to 1.
+A moment in a stage that few users get to, such as an account deletion, has a low reach.
 
 Use analytics when the user gives them, and name the source.
 With no data, estimate with these bands and say that the number is an estimate.
 
 | Reach | Who hits the moment |
 | --- | --- |
-| 1.0 | Each user who gets to the stage, because it is on the only path |
+| 1.0 | Each user, because the moment is on the only path |
 | 0.6 | Most users, on the common path |
 | 0.3 | Some users: a common mistake, a second feature, a phone |
 | 0.1 | Few users: a rare edge case, a small group |
