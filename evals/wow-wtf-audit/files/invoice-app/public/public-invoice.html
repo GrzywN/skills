@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <article class="card paper">
+      <header class="paper-header">
+        <div>
+          <p class="eyebrow">Invoice from</p>
+          <h1 id="seller"></h1>
+          <p class="muted" id="seller-tax-id"></p>
+        </div>
+        <p class="paper-number" id="number"></p>
+      </header>
+      <dl class="details" id="parties"></dl>
+      <section class="paper-item">
+        <p id="item"></p>
+        <p class="muted" id="item-pricing"></p>
+      </section>
+      <dl class="summary" id="totals"></dl>
+    </article>
+    <p class="muted centered">Sent with <a href="/">Kwit</a></p>
+  </main>
+  <script type="module" src="/static/public-invoice.js"></script>
+</body>
+</html>

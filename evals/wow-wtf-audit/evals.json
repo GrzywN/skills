@@ -1,0 +1,95 @@
+{
+  "skill_name": "wow-wtf-audit",
+  "evals": [
+    {
+      "id": 1,
+      "name": "full-audit-pl",
+      "prompt": "Zrób audyt WOW/WTF Kwita, naszej apki do faktur. Kod jest w evals/wow-wtf-audit/files/invoice-app, odpal go lokalnie przez `make dev`. Użytkownik: freelancer, który wystawia kilka faktur w miesiącu. Jego zadanie: wystawić fakturę i wysłać klientowi link, najlepiej w minutę. Konto demo jest w README, możesz też założyć nowe na adres @example.com. Chcę wiedzieć, co naprawić najpierw.",
+      "expected_output": "A report in Polish with the six sections in order: a verdict in three sentences, the top 5 actions, the ranked WTF list with full records, the existing WOW moments to protect, the WOW opportunities, and the coverage. The agent starts the app, uses it in a browser, and finds the planted moments by using it: the signup that answers a weak password with 'Error 422' and clears the form, the blank 2.5 second load of the list, the '+' control with no label and no keyboard access, the limit of 3 invoices that the 'Free forever' landing page does not mention, the double click that creates two invoices, the silent failure of a submit, the 'NaN zł' totals, the three names for the client, the list that overflows on a phone, and the account that can be deleted only by email. It protects the undo after a delete, the live totals and the pre-filled due date, and flags the 'Duplicate' link as hidden. Each WTF has evidence, a second reproduction and a score with three factors. The source of the app is unchanged.",
+      "files": [
+        "evals/wow-wtf-audit/files/invoice-app"
+      ],
+      "expectations": [
+        "The report has the six sections in this order: verdict, top 5 actions, WTF list, existing WOW moments to protect, WOW opportunities, coverage",
+        "The verdict has three sentences, gives the balance of WOW and WTF, and names one biggest lever",
+        "The report is in Polish and keeps the labels WTF and WOW",
+        "The WTF list has the signup that shows only 'Error 422' for a weak password and clears the fields, or the password rule that the form does not show",
+        "The WTF list has the invoice list that is blank for about 2.5 seconds with no loading feedback",
+        "The WTF list has the limit of 3 invoices and the Pro price that show up only on submit, against the 'Free forever' promise of the landing page",
+        "The WTF list has the double click on Submit that creates two invoices",
+        "The WTF list has the submit that fails with no message, for a long customer name or with no connection",
+        "The WTF list has the '+' control that has no label, or that the keyboard cannot reach, or that has no accessible name",
+        "The WTF list has at least three of these: the 'NaN zł' totals for an empty quantity or price, the three names Customer, Client and Contractor for one thing, the list that scrolls sideways on a phone, the empty list with no message and no first action, the form that loses its input on a refresh or after the session ends, the upgrade dialog that Escape does not close, the missing confirmation after a save, the account that can be deleted only by an email to support",
+        "The existing WOW moments include the Undo after a delete",
+        "The existing WOW moments include the live totals or the pre-filled due date",
+        "The 'Duplicate' link is flagged as a WOW that is hidden or late, with a proposal to surface it",
+        "Each WTF record has a score that shows its three factors: severity, reach and position",
+        "Each WTF record has a screenshot file that exists or exact steps, and says that it was reproduced a second time",
+        "Each WTF record names what the user expected and what happened",
+        "The top 5 actions are concrete changes that name a screen, and the fix of a WTF of severity 3 or more is not below a WOW action",
+        "The report gives the time to first value with the clicks and the seconds",
+        "The coverage section lists the stages and the lenses that were walked, what could not be reached, and what stayed unverified",
+        "The coverage section says that the instance was local, or that a real screen reader was not used, or that the reach is an estimate",
+        "No file in evals/wow-wtf-audit/files/invoice-app is changed, and the server that the agent started is stopped"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "missing-access",
+      "prompt": "Our activation is terrible. People sign up for our scheduling tool and most of them never book a single meeting. Can you audit the product and tell me what to fix first?",
+      "expected_output": "The agent cannot audit a product that it cannot use, so it asks for the access in one message: a URL, a build or a repository, and a test account or the permission to sign up. It does not ask for the core job, because the request gives it. It says that the audit uses the product for real and is read-only. It does not invent findings.",
+      "files": [],
+      "expectations": [
+        "The response asks for access to the product: a URL, a build or a repository",
+        "The response asks for a test account, or for the permission to sign up",
+        "The questions come in one message",
+        "The response does not ask what the core job is, or it states the core job from the request: to book a meeting",
+        "The response does not list WTF or WOW findings about the product",
+        "The response says that the audit uses the product for real, or that it is read-only"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "phone-lens-only",
+      "prompt": "Most Kwit users issue invoices from their phone, between two client meetings. Audit just that: a freelancer who creates an invoice on a phone with a bad connection. The app is in evals/wow-wtf-audit/files/invoice-app, run it with `make dev`, the demo login is in the README.",
+      "expected_output": "An audit of one lens and one flow. The agent uses a phone viewport with touch and a throttled network, and says which profile it used. It finds the invoice list that scrolls sideways and pushes the '+' control off the screen, the blank load of the list, which is longer on a slow connection, the submit that fails with no message when the connection drops, and the risk of a double submit while the slow request runs. The report keeps the six sections and the scores, and the coverage section says which stages and lenses were left out.",
+      "files": [
+        "evals/wow-wtf-audit/files/invoice-app"
+      ],
+      "expectations": [
+        "The agent used a phone viewport and a throttled network, and the report names the viewport or the device and the network profile",
+        "The WTF list has the invoice list that scrolls sideways on a phone, or the '+' control that is off the screen",
+        "The WTF list has the blank load of the invoice list with no feedback, with a measured time",
+        "The WTF list has the submit that does nothing visible when the connection is lost",
+        "The WTF list has the second invoice that a double tap or a repeated tap on Submit creates",
+        "The reach of the phone findings is not lowered to a minority value, because the request says that most users are on a phone",
+        "The report has the six sections, and each WTF has a score with three factors",
+        "The coverage section says that the other lenses and the stages outside the invoice flow were left out",
+        "The report does not present desktop-only or keyboard-only findings as ranked moments of this audit",
+        "No file in evals/wow-wtf-audit/files/invoice-app is changed"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "support-complaints",
+      "prompt": "Support keeps getting two complaints about Kwit: \"my invoice got created twice\" and \"the form ate everything I typed\". I could not reproduce either one. Find out what is real and what we should change. The app is in evals/wow-wtf-audit/files/invoice-app, run it with `make dev`, the demo login is in the README.",
+      "expected_output": "The agent reproduces the complaints in the product before it reads the code. A double click on Submit creates two invoices, with exact steps and a second reproduction. The form loses its input in more than one way: a refresh, an expired session that ends on the login page, the upgrade dialog at the limit of 3 invoices, and the signup form after a password error. A submit that fails with no message is reported next to them. Each record names its root cause in the code with a file and a line, and a concrete change. A way that the agent could not reproduce is listed as unverified. The source of the app is unchanged.",
+      "files": [
+        "evals/wow-wtf-audit/files/invoice-app"
+      ],
+      "expectations": [
+        "The response confirms that a double click on Submit creates two invoices, with steps that a person can follow",
+        "The response says that the double invoice was reproduced a second time, or gives a rate",
+        "The root cause of the double invoice is named in the code with a file: the button stays active while the request runs, or the server does not de-duplicate",
+        "The response finds at least three ways that typed input is lost: a refresh of the new invoice form, the back button, a session that ended, the close of the upgrade dialog at the limit of 3 invoices, the signup form after a password error",
+        "The response reports the submit that fails with no message, for a customer name over 200 characters or with no connection",
+        "Each finding has a root cause that is marked as confirmed in a file, or as probable",
+        "Each finding has a proposed change that names the screen and what changes on it",
+        "The findings have a score with three factors, or a clear ranking by impact on the user",
+        "A complaint or a path that the agent could not reproduce is listed as unverified, and not dropped or presented as a fact",
+        "The agent observed each finding in the running app, and did not only infer it from the code",
+        "No file in evals/wow-wtf-audit/files/invoice-app is changed"
+      ]
+    }
+  ]
+}

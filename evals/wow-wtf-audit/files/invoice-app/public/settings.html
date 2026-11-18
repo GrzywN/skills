@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings - Kwit</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="shell narrow">
+    <header class="app-header">
+      <a class="brand" href="/invoices">Kwit</a>
+      <nav><a href="/invoices">Back to invoices</a></nav>
+    </header>
+    <main>
+      <h1>Settings</h1>
+      <form class="card" id="settings-form">
+        <p class="field-label">Email</p>
+        <p id="email"></p>
+        <label for="companyName">Company name</label>
+        <input id="companyName" name="companyName" type="text" autocomplete="organization">
+        <label for="taxId">Tax ID</label>
+        <input id="taxId" name="taxId" type="text">
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" autocomplete="tel">
+        <div class="form-actions">
+          <button class="button" type="submit">Save changes</button>
+          <span class="saved" id="saved" role="status"></span>
+        </div>
+      </form>
+      <h2>Account</h2>
+      <p>To delete your account, write to support@kwit.example.</p>
+    </main>
+  </div>
+  <script type="module" src="/static/settings.js"></script>
+</body>
+</html>

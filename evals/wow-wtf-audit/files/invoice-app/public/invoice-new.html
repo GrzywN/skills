@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>New invoice - Kwit</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="shell narrow">
+    <header class="app-header">
+      <a class="brand" href="/invoices">Kwit</a>
+      <nav><a href="/invoices">Back to invoices</a></nav>
+    </header>
+    <main>
+      <h1>New invoice</h1>
+      <form class="card" id="invoice-form" autocomplete="off"></form>
+    </main>
+  </div>
+  <template id="upgrade-modal">
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-close">×</div>
+        <h2>Upgrade to Pro</h2>
+        <p>You have reached the limit of 3 invoices. Pro costs 49 zł / month.</p>
+        <button class="button" id="upgrade" type="button">Upgrade</button>
+        <p class="muted" id="upgrade-note"></p>
+      </div>
+    </div>
+  </template>
+  <script type="module" src="/static/invoice-new.js"></script>
+</body>
+</html>
