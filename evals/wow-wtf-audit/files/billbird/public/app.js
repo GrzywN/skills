@@ -176,7 +176,7 @@ async function initInvoices() {
     return element('tr', {}, [
       element('td', {}, [link]),
       element('td', { textContent: invoice.clientName }),
-      element('td', { textContent: formatDate(invoice.createdAt) }),
+      element('td', { className: 'date-cell', textContent: formatDate(invoice.createdAt) }),
       element('td', {}, [
         element('span', { className: `status status-${invoice.status}`, textContent: statusLabel(invoice.status) })
       ]),
