@@ -73,7 +73,7 @@ After forty screens you do not remember the first ones.
 Reproduced and Root cause come in step 6, and Score, Flags and Proposed change in step 7.
 
 Reproduced is a field of a WTF only.
-A WTF that you saw only once goes to the unverified list.
+A WTF that you saw only once in your own walk goes to the unverified list.
 A WOW to protect has "What can break it" in place of Root cause and Proposed change.
 A WOW opportunity has "What happens now" in place of What happened, and "Depends on" in place of Root cause.
 
@@ -115,6 +115,8 @@ Report a WTF outside the scope in one line when it blocks the path.
 
 When the user gives the notes of a walk that a person did, do not walk again unless the user asks.
 Treat what that person saw as observed, name the person as the evidence, and start at step 7.
+A WTF that the person saw is confirmed, also when the notes do not give a second time.
+In Reproduced, write what the notes say, or "not stated in the notes".
 What the person could not reproduce, or only heard from another person, is unverified.
 Say in the coverage section that you did not walk the product.
 
