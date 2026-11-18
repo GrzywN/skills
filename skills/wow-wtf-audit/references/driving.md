@@ -43,7 +43,7 @@ For a CLI or an API, the evidence is the exact command or request, the full outp
 ## Start a product from its repository
 
 An instance that you start from the repository is your own when it has its own database and no live keys for email or payment.
-Check its configuration before you rely on that.
+Check its configuration before you rely on that: the environment files, the compose files and the README, not the source.
 If you cannot tell, the instance is not your own, and each read-only rule of `SKILL.md` holds as it is written.
 
 In your own instance you can do four things that the read-only rules do not allow in other places:
@@ -185,7 +185,7 @@ The severity of a wait is in the score section of `SKILL.md`.
 
 ## Time to first value
 
-Count on the first-time walk, from the first screen to first value:
+Count on the first-time walk, from the first screen to first value, on the shortest path that works:
 
 - **Clicks:** each click or tap that is not a click into a field.
 - **Fields:** each field that the user must fill.
