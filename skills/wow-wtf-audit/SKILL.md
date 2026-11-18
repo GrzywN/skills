@@ -46,13 +46,15 @@ If you cannot name the source, drop the record.
 | Input | When it is missing |
 | --- | --- |
 | The product and the access to it: a URL, a build, a repository | Ask. You cannot audit without it. |
-| An account, when the product has a signup: a test account, or the permission to sign up with an address that you can read mail for | Ask, unless you start the instance yourself from the repository. |
+| An account, when the product has a signup: the permission to sign up, with a mailbox from the user if the product checks the address, or a test account | Ask, unless you start the instance yourself from the repository. Prefer the permission to sign up, because a ready account skips the signup and the onboarding. |
 | The target user | Take it from the request or the README. If only the landing page has it, take it after the first-screen test of step 2. State it as an assumption at the top of the report. |
 | The core job of that user (the job to be done) | The same. |
 | The competitors | Use the alternatives that the product names itself. If it names none, pick the two that a buyer would compare first, and say that you picked them. |
 
 Ask only for the first two, in one message, and only when the request, the product and the repository do not answer them.
 Infer the other three, and state them as assumptions.
+You can say that analytics and user complaints make the reach more exact, but do not wait for them.
+While you wait for the access, do not list likely findings, because nothing is observed yet.
 
 ## The audit is read-only
 
@@ -79,6 +81,7 @@ The product, its code, its settings and the data of other people are the same af
   Walk a purchase, an upgrade, a cancellation and an account deletion up to the last step before the one that cannot be undone, and stop there.
 - **Other people.**
   Do not send a message, an invitation or an email to a real person.
+  When the core job sends one, send it only to an address that the user gave you for the test.
   Look at competitors only through their public pages.
 
 An instance that you started yourself from the repository, with its own data, is the one exception.
