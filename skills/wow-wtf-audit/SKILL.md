@@ -146,7 +146,7 @@ Take a screenshot at each step where the two lines differ.
 Stage 6 is step 4 of this workflow.
 On the walks, record each error that you meet on the way, and do not force one.
 
-Count the clicks and the fields to first value on this walk.
+Count the clicks, the fields and the typed characters to first value on this walk.
 Time the seconds later, on a scripted replay of the same path.
 
 ### 3. Walk it again through the other four lenses

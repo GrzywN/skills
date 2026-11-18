@@ -8,7 +8,7 @@
 | Access | [URL, build, repository, test account] |
 | Compared with | [competitors, and "picked by the auditor" if the user named none] |
 | Date | [YYYY-MM-DD] |
-| Time to first value | [N clicks, N fields, N seconds of waiting, about N seconds for a person (estimate), on the path: step, step, step] |
+| Time to first value | [N clicks, N fields, N characters, N seconds of waiting, at least N seconds for a person (estimate), on the path: step, step, step] |
 | Moments | [N WTF, N WOW, N missed WOW, N unverified] |
 
 ## 1. Verdict
